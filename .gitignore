@@ -1,0 +1,10 @@
+# Generated test media (create it with tests/make_test_media.sh)
+tests/media/
+# Python
+__pycache__/
+*.pyc
+# System files
+.DS_Store
+Thumbs.db
+# Release archives
+*.zip
