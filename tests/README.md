@@ -10,7 +10,8 @@ Two browser windows connect and check the main features:
 - synchronised playback, pausing from the other side and subtitles;
 - chat (as plain text);
 - streaming to someone without the file;
-- the strict security policy.
+- the strict security policy;
+- converting AC-3 and DTS sound the browser can't play.
 
     sh make_test_media.sh                              # once; needs ffmpeg
     pip install playwright
@@ -24,6 +25,7 @@ It prints PASS/FAIL for each check and exits with code 1 if anything fails. Set 
 `make_test_media.sh` creates `tests/media/` (ignored by git), using only test patterns, tones and generated cover art, nothing copyrighted:
 
 - three short videos with a subtitle file;
+- a video with AC-3 and DTS sound tracks;
 - an MP3 with cover art.
 
 ## Test relay

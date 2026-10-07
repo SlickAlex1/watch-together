@@ -29,6 +29,7 @@ async def open_page(browser, strict=False, errors=None):
     await page.goto(APP)
     await page.locator('#termsAccept').click()                       # first-launch notice
     await page.locator('#terms').wait_for(state='hidden')
+    await page.click('label:has(input[name=where][value=local])')     # both windows are on this machine
     await page.uncheck('#stun')                                       # no internet needed for the test
     return page
 
@@ -99,6 +100,17 @@ async def main():
         await strict.click('[data-tab=playlist]'); await strict.set_input_files('#files', EPS[:1])
         await asyncio.sleep(1); await strict.click('#playBtn'); await asyncio.sleep(1.5)
         check('runs under its strict security policy', not strict_errors, '; '.join(strict_errors)[:120])
+
+        # sound the browser can't play (AC-3, DTS) is converted by the built-in decoder
+        await strict.set_input_files('#files', [str(MEDIA / 'Demo.Surround.mkv')])
+        await strict.locator('.pl-main', has_text='Surround').click()
+        try:
+            await strict.locator('#audioNote', has_text='Converted').wait_for(timeout=15000)
+            tracks = await strict.eval_on_selector_all('#audioTrack option', 'e => e.map(o => o.textContent)')
+            check('converts AC-3 / DTS sound', len(tracks) == 2 and await strict.evaluate("document.getElementById('v').muted"), ' | '.join(tracks))
+        except Exception as e:
+            check('converts AC-3 / DTS sound', False, str(e)[:120])
+        check('converter runs under the strict security policy', not strict_errors, '; '.join(strict_errors)[:120])
 
         check('no page errors', not errors, '; '.join(errors)[:160])
         await browser.close()

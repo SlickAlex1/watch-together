@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.4.0
+
+- **Sound browsers can't play:**
+  - AC-3, E-AC-3, DTS/DTS-HD, TrueHD, ALAC, WMA and PCM are converted on the device by a built-in decoder (FFmpeg compiled to WebAssembly) and played in sync with the picture.
+  - When streaming, the converted sound is sent along.
+- **Several sound tracks:** an **Audio** menu to pick the language or commentary track.
+- **Relay first over the internet:** the Connect tab asks where the other person is. Over the internet it guides you to set up a relay first (Step 1) and warns before starting without one; on the same Wi-Fi no relay is needed.
+- **Settings → Data saved in this browser:** lists exactly what the app has stored right now and deletes all of it with one button. It also says what is never stored.
+- **Smoother sync:** gentler speed corrections. In Firefox, and while converted sound plays, sync corrects by jumping only, avoiding constant speed changes.
+- **Smoothness warning:** the app tells you when a video keeps skipping frames, and what helps.
+- The volume setting is remembered.
+
 ## 1.3.0: first public release (beta)
 
 - Released as free software under the GNU GPL v3. The source is readable and the app ships unpacked.

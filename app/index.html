@@ -17,7 +17,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7+U/ncBxUaEISR6WMkA3VO/sctjI3k8gqnJkyikTscw='; style-src 'sha256-G5xTql5bNYY0Xi82rvbMN2krQuStbQKcahMcyb6FQMI='; media-src blob:; img-src blob:; worker-src 'self'; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-JuhsT7AT4adP+v7mp+Zue5wauJKxTCwTaaJyI68y7A0=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'sha256-faKRMJipwmBEsazKS7cZbOdIydRfzV15QAzo40UZwrw='; media-src blob:; img-src blob:; worker-src 'self' blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#16131b">
@@ -413,6 +413,29 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.25); }
 .badge:not([hidden]) { animation: pop .3s cubic-bezier(.2,1.6,.4,1); }
 @keyframes pop { from { transform: scale(.4); } to { transform: none; } }
 .share-opts { margin: .2rem 0 .4rem 1.6rem; }
+fieldset.where { border: 0; padding: 0; margin: .9rem 0 0; min-width: 0; }
+fieldset.where legend { padding: 0; margin: 0 0 .35rem; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.seg label { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; padding: .6rem .75rem; border: 1px solid var(--line); border-radius: var(--r-sm); font-weight: 600; font-size: .9rem; transition: border-color .18s ease, background-color .18s ease; }
+.seg small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
+.seg input:checked + span { border-color: var(--gold); background: rgba(214,180,122,.10); }
+.seg input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+.where-note { margin-top: .5rem; }
+.step-no { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: .05rem .5rem; margin-right: .5rem; vertical-align: .1em; }
+.step-title { margin: 1.1rem 0 0; font-weight: 600; }
+.step-title + .chooser, .no-relay + .chooser { margin-top: .5rem; }
+.no-relay { margin-top: .6rem; padding: .7rem .85rem; border: 1px solid rgba(231,187,106,.5); border-radius: var(--r-sm); background: rgba(231,187,106,.07); font-size: .875rem; animation: unfold .22s ease-out; }
+.no-relay p { margin: 0 0 .6rem; }
+details.relay.attention { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(214,180,122,.18); }
+.audio-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .45rem; font-size: .875rem; }
+.audio-row select { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm); padding: .3rem .4rem; max-width: 100%; }
+.audio-row .hint { margin: 0; }
+.saved-list { margin: .3rem 0 .8rem; padding-left: 1.2rem; font-size: .875rem; }
+.saved-list li { margin-bottom: .25rem; }
+.wipe-confirm { margin-top: .7rem; padding: .7rem .85rem; border: 1px solid rgba(229,138,131,.5); border-radius: var(--r-sm); background: rgba(229,138,131,.07); font-size: .875rem; animation: unfold .22s ease-out; }
+.wipe-confirm p { margin: 0 0 .6rem; }
 .diag { margin-top: .5rem; }
 .invite-preview img { display: block; width: 100%; border-radius: var(--r-sm); border: 1px solid var(--line); margin: .55rem 0 .1rem; animation: art-in .4s cubic-bezier(.2,.8,.2,1); }
 textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-break: normal; overflow-wrap: anywhere; }
@@ -534,6 +557,11 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           </button>
           <span id="peerRating" class="hint"></span>
         </div>
+        <div id="audioRow" class="audio-row" hidden>
+          <label for="audioTrack">Audio</label>
+          <select id="audioTrack"></select>
+          <span id="audioNote" class="hint"></span>
+        </div>
         <p id="mediaWarn" class="hint"></p>
       </div>
       <div class="syncbox">
@@ -557,9 +585,17 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       <div id="connSetup">
         <div class="section">
           <h2>Start watching together</h2>
-          <p class="hint">You'll swap two codes in any chat app. After that your browsers talk directly, with no server in between.</p>
+          <p class="hint">You'll swap two codes in any chat app. After that your browsers talk to each other, encrypted end to end.</p>
           <label class="field" for="myName">Your name, shown to the other person</label>
           <input id="myName" class="text" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Optional">
+          <fieldset class="where">
+            <legend class="field">Where is the other person?</legend>
+            <div class="seg" role="radiogroup">
+              <label><input type="radio" name="where" value="internet" checked><span>Somewhere else<small>over the internet</small></span></label>
+              <label><input type="radio" name="where" value="local"><span>Next to me<small>on the same Wi-Fi</small></span></label>
+            </div>
+          </fieldset>
+          <p id="whereNote" class="hint where-note"></p>
         </div>
 
         <div id="hostPanel" hidden>
@@ -595,8 +631,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
 
         <div id="netOptions">
         <details id="relay" class="relay" open>
-          <summary>Relay for internet connections <span id="relayBadge" class="tag"></span></summary>
-          <p class="hint">Mobile data and many Wi-Fi networks block direct connections, especially between countries and providers. A relay makes it work on any network. Only the person who starts the session needs one; it's passed to the other person inside the invite.</p>
+          <summary><span id="relayStepNo" class="step-no">Step 1</span>Relay for internet connections <span id="relayBadge" class="tag"></span></summary>
+          <p class="hint">Between two homes, phones or countries, a direct connection fails more often than it works: mobile data and many Wi-Fi networks block it. A free relay makes it work on any network and hides your IP address. You set it up once; only the person who starts the session needs one.</p>
           <details class="howto">
             <summary>How to get a free relay (about 2 minutes)</summary>
             <ol>
@@ -642,6 +678,11 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           <span>Also try a direct connection first, using Google's and Cloudflare's public STUN services to find your public address (recommended).</span>
         </label>
         </div>
+          <p id="connectStep" class="step-title"><span class="step-no">Step 2</span>Connect</p>
+          <div id="noRelayWarn" class="no-relay" role="alert" hidden>
+            <p><strong>No relay set up yet.</strong> Over the internet, connecting without one usually fails (mobile data, most home and school Wi-Fi). Setting one up takes about two minutes and is free.</p>
+            <div class="row"><button id="setupRelayBtn" type="button" class="primary small">Set up a relay</button><button id="tryDirectBtn" type="button" class="ghost small">Try without a relay</button></div>
+          </div>
           <div id="chooser" class="row chooser" role="group">
             <button id="startBtn" type="button" class="primary">Start a session</button>
             <button id="joinBtn" type="button" class="ghost">Join a session</button>
@@ -764,6 +805,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
         <label class="check"><input id="sfxOn" type="checkbox" checked><span>Play reaction sounds (applause, boo, laugh…)</span></label>
         <label class="field" for="sfxVol">Reaction sound volume</label>
         <input id="sfxVol" class="vol sfx-vol" type="range" min="0" max="100" value="60" aria-label="Reaction sound volume">
+        <label class="check"><input id="convertAudio" type="checkbox" checked><span>Convert sound the browser can't play (AC-3, E-AC-3, DTS, TrueHD and others, common in MKV movies). It happens on this device; nothing is uploaded.</span></label>
         <label class="check"><input id="rememberPos" type="checkbox" checked><span>Remember where you stopped in each episode, and which ones you've watched (saved only in this browser)</span></label>
         <div class="row settings-row"><button id="clearPosBtn" type="button" class="ghost small">Forget saved positions</button><span id="clearPosNote" class="hint"></span></div>
         <p class="hint">Settings on this tab are remembered in this browser.</p>
@@ -823,6 +865,18 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           <dt>1–7</dt><dd>Send a reaction with sound</dd>
         </dl>
       </div>
+      <div class="section">
+        <h2>Data saved in this browser</h2>
+        <p class="hint">To remember things between visits, the app keeps a few small items in this browser's storage on this device. They're never sent anywhere. Right now it holds:</p>
+        <ul id="savedList" class="saved-list"></ul>
+        <p class="hint"><strong>Never saved, so there's nothing of them to delete:</strong> your videos and music (the app only reads them from your device, never copies or uploads them), chat messages, invitations and replies.</p>
+        <button id="wipeBtn" type="button" class="ghost danger">Delete everything the app saved in this browser…</button>
+        <div id="wipeConfirm" class="wipe-confirm" hidden>
+          <p><strong>Delete everything in the list above?</strong> The app then reloads as if opened for the first time. This only affects this browser on this device, not the other person's.<span id="wipeConn"> It also ends your current session.</span></p>
+          <div class="row"><button id="wipeYes" type="button" class="ghost danger">Delete and reload</button><button id="wipeNo" type="button" class="ghost">Cancel</button></div>
+        </div>
+        <p class="hint">The browser itself keeps its own record of permissions you gave this page (such as notifications). Change those in your browser's site settings.</p>
+      </div>
     </div>
   </aside>
 </main>
@@ -858,7 +912,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   const MAX_ITEMS = 100;
   const MAX_CHAT = 500;
   const MAX_NAME = 24;
-  const APP_VERSION = '1.3.0';
+  const APP_VERSION = '1.4.0';
+  const IS_FIREFOX = /Firefox\//.test(navigator.userAgent);
+  let userVol = 1, userMuted = false, wiping = false;   // volume is kept apart from the video element
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
   const TURN_URL_RE = /^turns?:[A-Za-z0-9.-]{1,253}(:\d{1,5})?(\?transport=(udp|tcp))?$/;
   const MAX_RELAY_URLS = 6;
@@ -1075,6 +1131,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   window.addEventListener('resize', moveInk);
   function showTab(name) {
     activeTab = name;
+    if (name === 'settings') renderSaved();
     requestAnimationFrame(moveInk);
     for (const b of tabButtons) {
       const on = b.dataset.tab === name;
@@ -1237,7 +1294,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   }
   async function rtcConfig() {
     const relays = await relayList();
-    const force = relays.length > 0 && (!!inviteRelay || $('forceRelay').checked);
+    const force = relays.length > 0 && (!!inviteRelay || ($('forceRelay').checked && netMode() === 'internet'));
     const servers = (force || !$('stun').checked ? [] : STUN.slice()).concat(relays);
     return { iceServers: servers, iceTransportPolicy: force ? 'relay' : 'all' };
   }
@@ -1603,13 +1660,49 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     $('netcheck').hidden = true;
     $(r === 'host' ? 'hostPanel' : 'guestPanel').hidden = false;
   }
+  // ---------- where is the other person? (relay first over the internet) ----------
+  const netMode = () => { const r = document.querySelector('input[name=where]:checked'); return r ? r.value : 'internet'; };
+  function hasRelay() { try { return !!readRelayForm(); } catch (_) { return false; } }
+  function updateWhere() {
+    const internet = netMode() === 'internet', relay = hasRelay();
+    $('relayStepNo').hidden = !internet;
+    $('connectStep').querySelector('.step-no').hidden = !internet;
+    $('noRelayWarn').hidden = true;
+    $('relay').classList.remove('attention');
+    let note;
+    if (!internet) note = 'On the same Wi-Fi you can connect directly; no relay needed. Go straight to Connect.';
+    else if (relay) note = 'Your relay is set up, so connecting over the internet should work on any network. Go to Step 2.';
+    else note = 'Over the internet, first set up a free relay (Step 1), then connect (Step 2).';
+    $('whereNote').textContent = note;
+    if (!internet) $('relay').open = false;
+    else if (!relay) $('relay').open = true;
+    updateIpStatus();
+  }
+  for (const r of document.querySelectorAll('input[name=where]')) r.addEventListener('change', () => { updateWhere(); savePrefs(); });
+  for (const id of ['turnUrls', 'turnUser', 'turnPass']) $(id).addEventListener('input', () => { $('noRelayWarn').hidden = true; });
+  function showNoRelayWarn() {
+    $('noRelayWarn').hidden = false;
+    $('noRelayWarn').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  $('setupRelayBtn').addEventListener('click', () => {
+    $('noRelayWarn').hidden = true;
+    const d = $('relay'); d.open = true; d.classList.add('attention');
+    const how = d.querySelector('details.howto'); if (how) how.open = true;
+    d.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    setTimeout(() => $('turnUrls').focus({ preventScroll: true }), 350);
+  });
+  $('tryDirectBtn').addEventListener('click', () => { $('noRelayWarn').hidden = true; startHost(false); });
+
   // The host needs a complete config now; a guest may get the relay from the invite later.
   function relayOk() {
     try { readRelayForm(); saveRelay(); return true; }
     catch (e) { $('connErr').textContent = e.message; $('relay').open = true; return false; }
   }
 
-  $('startBtn').addEventListener('click', () => startHost(false));
+  $('startBtn').addEventListener('click', () => {
+    if (netMode() === 'internet' && !hasRelay()) { showNoRelayWarn(); return; }
+    startHost(false);
+  });
   async function startHost(compat) {
     if (!relayOk(true)) return;
     enterSession('host');
@@ -1830,7 +1923,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       $('peekWhat').textContent = d.what ? `To watch: ${d.what}` : '';
       $('peekRelay').textContent = d.relay
         ? `Includes their relay for this session, until ${new Date(d.relay.exp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-        : '';
+        : netMode() === 'internet' && !hasRelay()
+          ? "No relay in this invitation, and you haven't set one up. Over the internet that often fails: if it does, one of you needs a relay (Step 1)."
+          : '';
       box.hidden = false;
     } catch (e) {
       box.classList.add('bad');
@@ -2170,7 +2265,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     sideAudio.play().catch(() => {});
     return cap;
   }
-  function syncSideAudio() { if (sideAudio) { sideAudio.volume = v.volume; sideAudio.muted = v.muted; } }
+  function syncSideAudio() { if (sideAudio) { sideAudio.volume = userVol; sideAudio.muted = userMuted || alt.active; } }
 
   // Streaming decisions run one at a time; if something changes while one is in progress
   // (e.g. the other person's file list arrives while a stream is starting), it's re-checked after.
@@ -2199,7 +2294,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     let cap;
     try { cap = captureMedia(); }
     catch (_) { setTag($('mediaWarn'), "Couldn't capture this video for streaming.", 'bad'); return; }
-    const video = cap.getVideoTracks()[0] || null, audio = cap.getAudioTracks()[0] || null;
+    const video = cap.getVideoTracks()[0] || null;
+    const audio = (alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : cap.getAudioTracks()[0]) || null;
     if (video && 'contentHint' in video) video.contentHint = 'motion';
     const old = streamOut;
     try { await vt.sender.replaceTrack(video); await at.sender.replaceTrack(audio); }
@@ -2254,6 +2350,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   };
   function enterStreamMode(h, name, d, music) {
     music = music || {};
+    altStop(); $('audioRow').hidden = true;
     if (!streamIn || streamIn.h !== h) notify('stream', `${partnerName()} is streaming`, name);
     loadToken++; loading = false;
     if (streamOut) stopStream(false);
@@ -2446,13 +2543,15 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   });
 
   // Settings remembered between visits (this browser only).
-  const PREF_CHECKS = ['autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
+  const PREF_CHECKS = ['convertAudio', 'autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
   const PREF_SELECTS = { shareHours: ['3', '6', '12', '24'], subSize: ['0.8', '1', '1.25', '1.55'], streamQuality: ['high', 'medium', 'low'], playMode: ['auto', 'stream', 'local'] };
   function savePrefs() {
+    if (wiping) return;
     const o = { name: myName() };
     for (const id of PREF_CHECKS) o[id] = $(id).checked;
     for (const id of Object.keys(PREF_SELECTS)) o[id] = $(id).value;
     o.loop = loopMode; o.shuffle = shuffleOn; o.sfxVol = Number($('sfxVol').value); o.pv = 2;
+    o.where = netMode(); o.vol = userVol;
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(o)); } catch (_) {}
   }
   function loadPrefs() {
@@ -2470,6 +2569,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       if (['off', 'all', 'one'].includes(o.loop)) loopMode = o.loop;
       if (o.shuffle === true) shuffleOn = true;
       if (num(o.sfxVol, 0, 100)) $('sfxVol').value = String(o.sfxVol);
+      if (o.where === 'local' || o.where === 'internet') document.querySelector(`input[name=where][value=${o.where}]`).checked = true;
+      if (num(o.vol, 0, 1)) { userVol = o.vol; $('vol').value = String(Math.round(o.vol * 100)); }
       $('sfxVol').style.setProperty('--p', $('sfxVol').value + '%');
       if (typeof o.name === 'string') $('myName').value = cleanText(o.name, MAX_NAME, false);
       $('screen').style.setProperty('--sub-scale', $('subSize').value);
@@ -2853,6 +2954,354 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   $('likeBtn').addEventListener('click', () => setRating(1));
   $('dislikeBtn').addEventListener('click', () => setRating(-1));
 
+  // ---------- volume (kept separately: the video is muted while converted audio plays) ----------
+  function applyVolume() {
+    const vol = userMuted ? 0 : userVol;
+    if (alt.active && !streamIn) {
+      v.muted = true;
+      if (alt.gain) alt.gain.gain.value = vol;
+    } else {
+      v.muted = userMuted; v.volume = userVol;
+    }
+    syncSideAudio();
+  }
+
+  // ---------- converted audio: sound formats the browser can't play ----------
+  // Video files often carry sound in formats browsers can't decode (AC-3, E-AC-3, DTS, TrueHD...).
+  // For those, audio-decoder.js (FFmpeg compiled to WebAssembly, in a background worker) reads the
+  // file locally, decodes the track to stereo, and it's played through Web Audio in step with the
+  // (muted) video. The video element stays the clock; audio follows it.
+  const ALT_FILES = /\.(mkv|mk3d|mp4|m4v|mov|avi|ts|m2ts|mts|wmv|asf|flv|webm)$/i;
+  const CODEC_NAMES = { ac3: 'AC-3', eac3: 'E-AC-3', dts: 'DTS', truehd: 'TrueHD', mlp: 'MLP', aac: 'AAC', mp3: 'MP3', mp2: 'MP2',
+    flac: 'FLAC', opus: 'Opus', vorbis: 'Vorbis', alac: 'ALAC', wmav1: 'WMA', wmav2: 'WMA', wmapro: 'WMA Pro' };
+  const NATIVE_TEST = { aac: 'audio/mp4; codecs="mp4a.40.2"', mp3: 'audio/mpeg', opus: 'audio/webm; codecs="opus"',
+    vorbis: 'audio/webm; codecs="vorbis"', flac: 'audio/flac', ac3: 'audio/mp4; codecs="ac-3"', eac3: 'audio/mp4; codecs="ec-3"' };
+  const codecLabel = (c) => CODEC_NAMES[c] || (/^pcm/.test(c) ? 'PCM' : String(c).toUpperCase());
+  function nativeAudio(codec) {
+    const t = NATIVE_TEST[codec];
+    if (!t) return false;
+    try { return v.canPlayType(t) !== ''; } catch (_) { return false; }
+  }
+  const langNames = (() => { try { return new Intl.DisplayNames([navigator.language || 'en', 'en'], { type: 'language' }); } catch (_) { return null; } })();
+  function langLabel(code) {
+    if (!code || /^(und|zxx|mis|mul|root)$/i.test(code)) return '';
+    try { const n = langNames && langNames.of(code); return n && n.toLowerCase() !== code.toLowerCase() ? n[0].toUpperCase() + n.slice(1) : code; }
+    catch (_) { return code; }
+  }
+  const chLabel = (n) => (n === 1 ? 'mono' : n === 2 ? 'stereo' : n === 6 ? '5.1' : n === 8 ? '7.1' : n ? `${n} channels` : '');
+  function trackLabel(t, i) {
+    return [langLabel(t.lang) || `Track ${i + 1}`, [codecLabel(t.codec), chLabel(t.channels)].filter(Boolean).join(' '), cleanText(t.title, 60, false)]
+      .filter(Boolean).join(' · ');
+  }
+
+  let decoderLib = null;
+  function loadDecoderLib() {
+    if (!decoderLib) {
+      decoderLib = new Promise((res, rej) => {
+        if (self.WTAudioDecoder) { res(self.WTAudioDecoder); return; }
+        const sc = document.createElement('script');
+        sc.src = 'audio-decoder.js';
+        sc.onload = () => (self.WTAudioDecoder ? res(self.WTAudioDecoder) : rej(new Error('decoder missing')));
+        sc.onerror = () => rej(new Error('audio-decoder.js is missing next to index.html'));
+        document.head.appendChild(sc);
+      });
+      decoderLib.catch(() => { decoderLib = null; });
+    }
+    return decoderLib;
+  }
+  function makeDecoderWorker(lib) {
+    const url = URL.createObjectURL(new Blob([lib.worker], { type: 'text/javascript' }));
+    const w = new Worker(url);
+    let n = 0;
+    const wait = new Map();
+    w.onmessage = (e) => {
+      const p = wait.get(e.data.id);
+      if (!p) return;
+      wait.delete(e.data.id);
+      if (e.data.error) p.rej(new Error(e.data.error)); else p.res(e.data);
+    };
+    w.onerror = (e) => { e.preventDefault(); for (const p of wait.values()) p.rej(new Error('decoder stopped')); wait.clear(); alt.client = null; };
+    const call = (cmd, data, transfer) => new Promise((res, rej) => {
+      const id = ++n;
+      wait.set(id, { res, rej });
+      w.postMessage(Object.assign({ id, cmd }, data), transfer || []);
+    });
+    const bin = atob(lib.wasm), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const ready = call('init', { wasm: bytes.buffer }, [bytes.buffer]).finally(() => URL.revokeObjectURL(url));
+    return { call, ready };
+  }
+
+  const alt = { client: null, openFor: null, item: null, active: false, tracks: [], nativeIdx: -1, track: -1, rate: 48000,
+    queue: [], decoding: false, ended: false, gen: 0, lastEnd: null, needAnchor: true, anchorCtx: 0, anchorMedia: 0,
+    rateAt: 1, sources: [], mix: null, gain: null, dest: null, timer: null, drift: [], ticks: 0, tapHint: false };
+
+  async function altClient() {
+    if (!alt.client) alt.client = makeDecoderWorker(await loadDecoderLib());
+    await alt.client.ready;
+    return alt.client;
+  }
+  async function altOpen(it) {
+    const c = await altClient();
+    if (alt.openFor !== it) {
+      alt.openFor = null;
+      const r = await c.call('open', { file: it.file });
+      alt.openFor = it;
+      it.media = r.info;
+    }
+    return c;
+  }
+  // What audio does this file have, and can the browser play it? Runs while the video loads.
+  async function altPrepare(it, token) {
+    altStop();
+    alt.tracks = []; alt.nativeIdx = -1;
+    renderAudioRow();
+    if (it.kind === 'audio' || !ALT_FILES.test(it.name)) return;
+    try { await altOpen(it); } catch (_) { return; }
+    if (token !== loadToken || !it.media) return;
+    const tracks = it.media.streams.filter((x) => x.type === 'audio');
+    alt.tracks = tracks;
+    if (!tracks.length) return;
+    // Browsers play a file's first audio track.
+    alt.nativeIdx = nativeAudio(tracks[0].codec) ? tracks[0].index : -1;
+    let want = it.audioChoice;
+    if (want === undefined || !tracks.some((x) => x.index === want)) {
+      want = alt.nativeIdx >= 0 ? alt.nativeIdx : (tracks.find((x) => x.default && x.decodable) || tracks.find((x) => x.decodable) || tracks[0]).index;
+    }
+    renderAudioRow();
+    if (want === alt.nativeIdx) return;
+    if (!$('convertAudio').checked) {
+      setTag($('mediaWarn'), `This video's sound (${codecLabel(tracks[0].codec)}) is a format this browser can't play. Turn on "Convert sound the browser can't play" in Settings.`, 'warn');
+      return;
+    }
+    await altStart(it, want, token);
+  }
+  async function altStart(it, index, token) {
+    try {
+      const c = await altOpen(it);
+      const r = await c.call('select', { index });
+      if (token !== loadToken || curItem() !== it) return;
+      const ctx = sfxCtx();
+      if (!ctx) throw new Error('no Web Audio');
+      if (!alt.mix) {
+        alt.mix = ctx.createGain();
+        alt.gain = ctx.createGain();
+        alt.mix.connect(alt.gain); alt.gain.connect(ctx.destination);
+        if (ctx.createMediaStreamDestination) { alt.dest = ctx.createMediaStreamDestination(); alt.mix.connect(alt.dest); }
+      }
+      alt.item = it; alt.track = index; alt.rate = r.rate; alt.active = true;
+      altReset(true);
+      applyVolume(); renderAudioRow(); refreshStreamAudio();
+      if (!alt.timer) alt.timer = setInterval(altTick, 100);
+      altTick();
+    } catch (e) {
+      alt.active = false; applyVolume();
+      setTag($('mediaWarn'), `Couldn't convert this sound (${e.message}). Converting the file to MP4 with AAC audio always works; see the README.`, 'bad');
+    }
+  }
+  function altStop() {
+    const was = alt.active;
+    alt.active = false; alt.track = -1;
+    clearInterval(alt.timer); alt.timer = null;
+    altStopSources(); alt.queue = []; alt.gen++;
+    if (was) { applyVolume(); refreshStreamAudio(); }
+  }
+  function altStopSources() {
+    for (const src of alt.sources) { try { src.stop(); } catch (_) {} }
+    alt.sources = [];
+    for (const ch of alt.queue) ch.scheduled = false;
+  }
+  // Forget decoded audio and start decoding again from the video's position.
+  function altReset(seek) {
+    altStopSources();
+    alt.gen++; alt.queue = []; alt.ended = false; alt.lastEnd = null; alt.needAnchor = true;
+    if (seek && alt.client) alt.client.call('seek', { t: Math.max(0, v.currentTime - 0.1) }).catch(() => {});
+  }
+  function altFill() {
+    if (alt.decoding || alt.ended || !alt.client) return;
+    const last = alt.queue[alt.queue.length - 1];
+    if (last && last.end - v.currentTime > 5 * Math.max(1, v.playbackRate)) return;
+    alt.decoding = true;
+    const gen = alt.gen;
+    alt.client.call('decode', { seconds: 1.5 }).then((r) => {
+      alt.decoding = false;
+      if (gen !== alt.gen || !alt.active) return;
+      if (r.end) { alt.ended = true; return; }
+      const len = r.l.length, dur = len / alt.rate;
+      // Consecutive chunks join sample-exactly (container timestamps can be off by a millisecond).
+      let start = r.start;
+      if (alt.lastEnd !== null && Math.abs(start - alt.lastEnd) < 0.05) start = alt.lastEnd;
+      alt.lastEnd = start + dur;
+      alt.queue.push({ start, end: start + dur, l: r.l, r: r.r, len, scheduled: false });
+      altSchedule();
+      altFill();
+    }).catch(() => { alt.decoding = false; });
+  }
+  const outLatency = (ctx) => (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
+  // When should the sound for media time m start, on the audio clock?
+  const ctxTimeFor = (ctx, m) => alt.anchorCtx + (m - alt.anchorMedia) / alt.rateAt - outLatency(ctx);
+  function altAnchor(ctx) {
+    altStopSources();
+    const m = v.currentTime;
+    alt.queue = alt.queue.filter((ch) => ch.end > m);
+    if (!alt.queue.length || alt.queue[0].start > m + 0.15) { altReset(true); }
+    alt.anchorMedia = m; alt.anchorCtx = ctx.currentTime; alt.rateAt = v.playbackRate || 1;
+    alt.needAnchor = false; alt.drift = [];
+  }
+  function altSchedule() {
+    const ctx = actx;
+    if (!alt.active || alt.needAnchor || !ctx || ctx.state !== 'running' || v.paused) return;
+    const now = ctx.currentTime;
+    for (const ch of alt.queue) {
+      if (ch.scheduled) continue;
+      let at = ctxTimeFor(ctx, ch.start);
+      if (at - now > 1.5) break;                 // schedule a little ahead only
+      const buf = ctx.createBuffer(2, ch.len, alt.rate);
+      buf.copyToChannel(ch.l, 0); buf.copyToChannel(ch.r, 1);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.playbackRate.value = alt.rateAt;
+      src.connect(alt.mix);
+      let offset = 0;
+      if (at < now + 0.02) { offset = (now + 0.02 - at) * alt.rateAt; at = now + 0.02; }
+      ch.scheduled = true;
+      if (offset >= buf.duration) continue;
+      src.start(at, offset);
+      src.onended = () => { alt.sources = alt.sources.filter((x) => x !== src); };
+      alt.sources.push(src);
+    }
+    const m = v.currentTime;
+    while (alt.queue.length && alt.queue[0].scheduled && alt.queue[0].end < m - 2) alt.queue.shift();
+  }
+  function altTick() {
+    if (!alt.active || streamIn) return;
+    const ctx = sfxCtx();
+    if (!ctx) return;
+    const playing = !v.paused && !v.seeking && !v.ended && v.readyState >= 3 && !buffering;
+    if (!playing) {
+      if (alt.sources.length) altStopSources();
+      alt.needAnchor = true;
+      altFill();
+      return;
+    }
+    if (ctx.state !== 'running') {
+      ctx.resume().catch(() => {});
+      if (!alt.tapHint) { alt.tapHint = true; toast(null, 'Tap anywhere on the page to turn the sound on.'); }
+      return;
+    }
+    if (Math.abs((v.playbackRate || 1) - alt.rateAt) > 0.001) alt.needAnchor = true;
+    if (alt.needAnchor) altAnchor(ctx);
+    else if (++alt.ticks % 10 === 0 && alt.sources.length) {
+      // Audio clock and video clock drift apart slowly: re-align when they're 80 ms apart.
+      const heard = alt.anchorMedia + (ctx.currentTime - alt.anchorCtx) * alt.rateAt;
+      alt.drift.push(heard - v.currentTime);
+      if (alt.drift.length > 5) alt.drift.shift();
+      const sorted = alt.drift.slice().sort((a, b) => a - b), mid = sorted[sorted.length >> 1];
+      if (alt.drift.length >= 3 && Math.abs(mid) > 0.08) alt.needAnchor = true;
+    }
+    altFill();
+    altSchedule();
+  }
+  for (const ev of ['pause', 'seeking', 'waiting', 'ratechange', 'emptied']) {
+    v.addEventListener(ev, () => { if (!alt.active) return; altStopSources(); alt.needAnchor = true; });
+  }
+  v.addEventListener('seeked', () => { if (alt.active) altReset(true); });
+  function refreshStreamAudio() {
+    if (!streamOut || !pc) return;
+    const { at } = mediaTransceivers();
+    const track = alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : streamOut.cap.getAudioTracks()[0];
+    if (at) at.sender.replaceTrack(track || null).catch(() => {});
+  }
+  function renderAudioRow() {
+    const it = curItem(), row = $('audioRow'), sel = $('audioTrack');
+    const show = !!it && !streamIn && (alt.tracks.length > 1 || alt.active);
+    row.hidden = !show;
+    if (!show) return;
+    sel.textContent = '';
+    alt.tracks.forEach((t, i) => {
+      const o = document.createElement('option');
+      o.value = String(t.index);
+      o.textContent = trackLabel(t, i) + (t.index === alt.nativeIdx ? '' : t.decodable ? ' (converted)' : " (can't play)");
+      o.disabled = t.index !== alt.nativeIdx && !t.decodable;
+      sel.appendChild(o);
+    });
+    sel.value = String(alt.active ? alt.track : alt.nativeIdx >= 0 ? alt.nativeIdx : '');
+    $('audioNote').textContent = alt.active ? 'Converted on this device' : '';
+  }
+  $('audioTrack').addEventListener('change', () => {
+    const it = curItem(), idx = Number($('audioTrack').value);
+    if (!it || !Number.isInteger(idx)) return;
+    it.audioChoice = idx;
+    if (idx === alt.nativeIdx) { altStop(); renderAudioRow(); }
+    else altStart(it, idx, loadToken);
+  });
+  $('convertAudio').addEventListener('change', () => {
+    const it = curItem();
+    if (!$('convertAudio').checked) { altStop(); renderAudioRow(); }
+    else if (it) { setTag($('mediaWarn'), ''); altPrepare(it, loadToken); }
+  });
+
+  // ---------- smooth playback check ----------
+  // If the browser keeps dropping frames, say so (and why), instead of leaving people guessing.
+  const smooth = { base: null, token: -1 };
+  setInterval(() => {
+    if (cur < 0 || streamIn || v.paused || !v.getVideoPlaybackQuality || $('stage').classList.contains('audio')) { smooth.base = null; return; }
+    const q = v.getVideoPlaybackQuality();
+    if (!smooth.base) { smooth.base = { d: q.droppedVideoFrames, t: q.totalVideoFrames }; return; }
+    const dd = q.droppedVideoFrames - smooth.base.d, dt = q.totalVideoFrames - smooth.base.t;
+    if (dt < 90) return;
+    smooth.base = { d: q.droppedVideoFrames, t: q.totalVideoFrames };
+    if (dd / dt < 0.15 || smooth.token === loadToken || $('mediaWarn').textContent) return;
+    smooth.token = loadToken;
+    const it = curItem(), vs = it && it.media && it.media.streams.find((x) => x.type === 'video');
+    const heavy = vs && (/hevc|h265/i.test(vs.codec) || /10/.test(vs.profile || ''));
+    setTag($('mediaWarn'), IS_FIREFOX
+      ? "This video isn't playing smoothly in Firefox (it's skipping frames). Chrome or Edge usually play MKV files more smoothly; converting the file to MP4 also helps (see the README)."
+      : heavy
+        ? "This video isn't playing smoothly: its format (HEVC or 10-bit) is heavy for this device. Converting it to MP4 with H.264 helps (see the README)."
+        : "This video isn't playing smoothly (the browser is skipping frames). Closing other tabs and apps can help; converting the file to MP4 helps most (see the README).", 'warn');
+  }, 3000);
+
+  // ---------- data saved in this browser ----------
+  const STORE_PREFIX = 'watch-together.';
+  function storedJSON(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return null; } }
+  async function renderSaved() {
+    const ul = $('savedList'); ul.textContent = '';
+    const add = (text) => { const li = document.createElement('li'); li.textContent = text; ul.appendChild(li); };
+    let keys = [];
+    try { keys = Object.keys(localStorage).filter((k) => k.startsWith(STORE_PREFIX)); } catch (_) {}
+    const has = (k) => keys.includes(k);
+    if (has(PREFS_KEY)) {
+      const o = storedJSON(PREFS_KEY), nm = o && typeof o.name === 'string' ? cleanText(o.name, MAX_NAME, false) : '';
+      add(`Your settings${nm ? ` and your name ("${nm}")` : ''}`);
+    }
+    if (has(PROG_KEY)) { const n = Object.keys(storedJSON(PROG_KEY) || {}).length; add(`Where you stopped in ${n} video${n === 1 ? '' : 's'} or song${n === 1 ? '' : 's'} (stored by a file fingerprint, not the file name)`); }
+    if (has(RATE_KEY)) { const n = Object.keys(storedJSON(RATE_KEY) || {}).length; add(`${n} like${n === 1 ? '' : 's'} and dislike${n === 1 ? '' : 's'} (by file fingerprint)`); }
+    if (has(RELAY_KEY)) add('Your relay address and login (because you ticked "Remember these relay details")');
+    if (has(RELAY_USE_KEY)) add("This month's relay data counter");
+    if (has(TERMS_KEY)) add("That you've already seen the first-launch notice");
+    const known = [PREFS_KEY, PROG_KEY, RATE_KEY, RELAY_KEY, RELAY_USE_KEY, TERMS_KEY];
+    const other = keys.filter((k) => !known.includes(k)).length;
+    if (other) add(`${other} other item${other === 1 ? '' : 's'} from an older version of the app`);
+    let regs = [];
+    try { if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) regs = await navigator.serviceWorker.getRegistrations(); } catch (_) {}
+    if (regs.length) add('The small notification helper (installed when you turned on notifications)');
+    if (!ul.children.length) add('Nothing at the moment.');
+    $('wipeBtn').disabled = !keys.length && !regs.length;
+  }
+  $('wipeBtn').addEventListener('click', () => { $('wipeConn').hidden = !connected; $('wipeConfirm').hidden = false; $('wipeBtn').hidden = true; });
+  $('wipeNo').addEventListener('click', () => { $('wipeConfirm').hidden = true; $('wipeBtn').hidden = false; });
+  $('wipeYes').addEventListener('click', async () => {
+    wiping = true;
+    try { Object.keys(localStorage).filter((k) => k.startsWith(STORE_PREFIX)).forEach((k) => localStorage.removeItem(k)); } catch (_) {}
+    try {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+        for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+      }
+    } catch (_) {}
+    if (pc) { try { pc.close(); } catch (_) {} }
+    location.reload();
+  });
+
   // ---------- playback core ----------
   const curItem = () => items[cur] || null;
   const curHash = () => (items[cur] ? items[cur].hash : null);
@@ -2928,6 +3377,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     curUrl = URL.createObjectURL(it.file);
     v.src = curUrl;
     $('stage').classList.remove('empty'); $('emptyMsg').hidden = true;
+    altPrepare(it, token);
     showArt(it.kind === 'audio', { url: it.art && it.art.url, title: itemTitle(it), artist: it.tags && it.tags.artist });
     setTag($('mediaWarn'), ''); audioChecked = false; $('subtitle').textContent = '';
     renderNow(); renderPlaylist(); updateControls();
@@ -3057,8 +3507,12 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     labelDiff(diff);
     if (m.f) { if (Math.abs(diff) > 0.04) seekTo(expected); applyRate(1); return; }
     if (m.b || buffering) { applyRate(1); return; }
-    if (Math.abs(diff) > 0.6) { applyRate(1); seekTo(expected); }
-    else if (m.p && Math.abs(diff) > 0.04) applyRate(1 - clamp(diff * 0.45, -0.12, 0.12));
+    // Converted audio, and Firefox's pitch correction, don't like constant speed changes: there,
+    // only jump when the gap is noticeable. Elsewhere, nudge the speed by at most 6%.
+    const seekOnly = alt.active || IS_FIREFOX;
+    if (Math.abs(diff) > (seekOnly ? 0.3 : 0.6)) { applyRate(1); seekTo(expected); }
+    else if (seekOnly) applyRate(1);
+    else if (m.p && Math.abs(diff) > 0.04) applyRate(1 - clamp(diff * 0.4, -0.06, 0.06));
     else { if (!m.p && Math.abs(diff) > 0.1) seekTo(expected); applyRate(1); }
   }
   function requestResync() {
@@ -3117,10 +3571,18 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     setTimeout(() => {
       if (audioChecked || v.paused || token !== loadToken) return;
       audioChecked = true;
+      if (alt.active) return;
       const chromeNoAudio = 'webkitAudioDecodedByteCount' in v && v.webkitAudioDecodedByteCount === 0 && v.webkitVideoDecodedByteCount > 0;
       const firefoxNoAudio = v.mozHasAudio === false;
-      if ((chromeNoAudio || firefoxNoAudio) && !$('mediaWarn').textContent) {
-        setTag($('mediaWarn'), "No sound detected: the audio is probably a format this browser can't play (AC3, E-AC3 or DTS). Convert the audio to AAC, see the README.", 'warn');
+      if (!(chromeNoAudio || firefoxNoAudio)) return;
+      const it = curItem(), pick = alt.tracks.find((t) => t.decodable);
+      if (it && pick && $('convertAudio').checked) {
+        altStart(it, alt.nativeIdx >= 0 ? alt.nativeIdx : pick.index, token);
+        toast(null, "This video's sound is in a format your browser can't play, so the app is converting it on this device.");
+      } else if (!$('mediaWarn').textContent) {
+        setTag($('mediaWarn'), alt.tracks.length && !$('convertAudio').checked
+          ? "No sound: this browser can't play this video's audio format. Turn on \"Convert sound the browser can't play\" in Settings."
+          : "No sound detected: the audio is probably a format this browser can't play. See \"Video and music formats\" in the README.", 'warn');
       }
     }, 3000);
   }
@@ -3167,11 +3629,16 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     if (SPEEDS.includes(r)) setBaseRate(r, true);
   });
   $('vol').addEventListener('input', () => {
-    v.volume = Number($('vol').value) / 100;
-    v.muted = v.volume === 0;
-    updateControls();
+    userVol = Number($('vol').value) / 100;
+    userMuted = userVol === 0;
+    applyVolume(); updateControls();
   });
-  function toggleMute() { v.muted = !v.muted; if (!v.muted && v.volume === 0) { v.volume = 0.5; $('vol').value = '50'; } updateControls(); }
+  $('vol').addEventListener('change', savePrefs);
+  function toggleMute() {
+    userMuted = !userMuted;
+    if (!userMuted && userVol === 0) { userVol = 0.5; $('vol').value = '50'; }
+    applyVolume(); updateControls();
+  }
   $('muteBtn').addEventListener('click', toggleMute);
   function toggleSubs() { subsOn = !subsOn; if (!subsOn) $('subtitle').textContent = ''; updateControls(); }
   $('ccBtn').addEventListener('click', toggleSubs);
@@ -3213,10 +3680,10 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     $('ccBtn').disabled = !(it && it.cues) && !streamIn;
     syncSideAudio();
     $('ccBtn').setAttribute('aria-pressed', subsOn ? 'true' : 'false');
-    const level = v.muted || v.volume === 0 ? 'mute' : v.volume < 0.34 ? 'low' : v.volume < 0.67 ? 'mid' : 'high';
+    const level = userMuted || userVol === 0 ? 'mute' : userVol < 0.34 ? 'low' : userVol < 0.67 ? 'mid' : 'high';
     $('muteBtn').dataset.level = level;
     $('muteBtn').setAttribute('aria-label', (level === 'mute' ? 'Unmute' : 'Mute') + ' (M)');
-    $('vol').style.setProperty('--p', (v.muted ? 0 : v.volume * 100) + '%');
+    $('vol').style.setProperty('--p', (userMuted ? 0 : userVol * 100) + '%');
     updateTime();
   }
 
@@ -3962,7 +4429,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   showModeHint();
   $('appVersion').textContent = 'v' + APP_VERSION; $('termsVersion').textContent = APP_VERSION;
   $('editPl').disabled = !$('sharePl').checked;
-  updateIpStatus();
+  updateWhere();
+  applyVolume(); updateControls();
   requestAnimationFrame(moveInk);
   if ($('notifyOn').checked) {
     if (notifSupported && Notification.permission === 'granted') setupSW();
@@ -3973,7 +4441,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   renderModes();
   showQualityWarn();
   showRelayUse();
-  window.addEventListener('beforeunload', () => { saveProgress(); if (pc) pc.close(); });
+  window.addEventListener('beforeunload', () => { if (!wiping) saveProgress(); if (pc) pc.close(); });
 })();
 </script>
 </body>

@@ -20,7 +20,9 @@ Please don't post invitation or reply codes publicly. Report security problems p
        cd src
        python3 build.py
 
-   This writes `app/index.html` with a fresh Content Security Policy (hashes of the inline style and script). An edited `app/index.html` won't run without rebuilding.
+   This writes `app/index.html` with a fresh Content Security Policy (hashes of the inline style and script), and packs `tools/audio-decoder/wt_audio.wasm` with `src/audio-decoder.worker.js` into `app/audio-decoder.js`. An edited `app/index.html` won't run without rebuilding.
+
+   To change the sound converter itself, edit `tools/audio-decoder/wt_audio.c` and run `tools/audio-decoder/build.sh` (see its README), then rebuild as above.
 3. Test (see [tests/README.md](tests/README.md)):
 
        cd tests

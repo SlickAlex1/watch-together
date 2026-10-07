@@ -10,7 +10,7 @@ style and script, so only this code can run in it and it can't contact any websi
 Always edit src/index.template.html and rebuild: an edited app/index.html won't run because its
 hashes no longer match.
 """
-import base64, hashlib, pathlib, re, sys
+import base64, hashlib, json, pathlib, re, sys, zlib
 from minify import minify_js, minify_css, minify_html
 
 here = pathlib.Path(__file__).parent
@@ -38,11 +38,13 @@ else:
 
 csp = "; ".join([
     "default-src 'none'",
-    "script-src " + h(script),
+    # 'strict-dynamic' lets the app load its own audio-decoder.js on demand; 'wasm-unsafe-eval'
+    # allows WebAssembly (the audio decoder). No other code and no remote scripts can run.
+    "script-src " + h(script) + " 'strict-dynamic' 'wasm-unsafe-eval'",
     "style-src " + h(style),
     "media-src blob:",
     "img-src blob:",
-    "worker-src 'self'",
+    "worker-src 'self' blob:",
     "connect-src 'none'",
     "font-src 'none'",
     "object-src 'none'",
@@ -52,4 +54,20 @@ csp = "; ".join([
 page = page.replace("__CSP__", csp)
 (app / "index.html").write_text(page, encoding="utf-8")
 (app / "sw.js").write_text((here / "sw.js").read_text(encoding="utf-8"), encoding="utf-8")
+
+# Audio decoder: the WebAssembly module (compressed) and its worker, in one file loaded on demand.
+wasm_file = here.parent / "tools" / "audio-decoder" / "wt_audio.wasm"
+if wasm_file.exists():
+    comp = zlib.compressobj(9, zlib.DEFLATED, -15)
+    packed = comp.compress(wasm_file.read_bytes()) + comp.flush()
+    worker = (here / "audio-decoder.worker.js").read_text(encoding="utf-8")
+    (app / "audio-decoder.js").write_text(
+        "/* Watch together audio decoder. Copyright (C) 2026 SlickAlex, GPL-3.0-or-later.\n"
+        " * Contains FFmpeg 7.1 demuxers and audio decoders compiled to WebAssembly (LGPL-2.1-or-later).\n"
+        " * Source and build steps: tools/audio-decoder/ in the Watch together repository. */\n"
+        "self.WTAudioDecoder = { wasm: '" + base64.b64encode(packed).decode() + "',\n  worker: "
+        + json.dumps(worker) + " };\n", encoding="utf-8")
+    print(f"app/audio-decoder.js: wasm {wasm_file.stat().st_size:,} bytes -> packed {len(packed):,}")
+else:
+    print("note: tools/audio-decoder/wt_audio.wasm not found, so app/audio-decoder.js wasn't updated")
 print(f"Built Watch together {version}{' (small)' if small else ''}: app/index.html {len(page):,} bytes, app/sw.js")

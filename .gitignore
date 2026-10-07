@@ -8,3 +8,5 @@ __pycache__/
 Thumbs.db
 # Release archives
 *.zip
+# Sound converter build folder (tools/audio-decoder/build.sh)
+tools/audio-decoder/.work/
