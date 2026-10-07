@@ -1,0 +1,67 @@
+# Publishes the app on GitHub Pages, at https://<user>.github.io/<repository>/
+# One-time setup: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# It then runs on every push to main that changes the app, or by hand from the Actions tab.
+name: Publish the app online
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "src/**"
+      - "tools/audio-decoder/wt_audio.wasm"
+      - "LICENSE"
+      - "NOTICE.md"
+      - "licenses/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time; a newer push waits instead of cancelling one that's halfway done.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Build the app for this address
+        # Rebuilds app/ from src/ so the site always matches the source, with this site's own
+        # address in invitations and link previews (forks get theirs, not the original's).
+        run: python3 src/build.py --site-url "${{ steps.pages.outputs.base_url }}/"
+
+      - name: Put the site together
+        run: |
+          mkdir _site
+          cp -r app/. _site/
+          cp LICENSE NOTICE.md _site/
+          cp -r licenses _site/licenses
+          # The old address (…/app/) forwards to the new one.
+          mkdir _site/app
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Watch together</title>' \
+            '<meta http-equiv="refresh" content="0; url=../">' \
+            '<p>Watch together has moved to <a href="../">a shorter address</a>.</p>' > _site/app/index.html
+          touch _site/.nojekyll
+          ls -la _site
+
+      - uses: actions/upload-pages-artifact@v5
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

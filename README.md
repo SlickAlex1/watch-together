@@ -1,10 +1,12 @@
 # Watch together
 
 [![Status: beta](https://img.shields.io/badge/status-beta-orange)](CHANGELOG.md)
-[![Version 1.4.0](https://img.shields.io/badge/version-1.4.0-d6b47a)](CHANGELOG.md)
+[![Version 1.5.0](https://img.shields.io/badge/version-1.5.0-d6b47a)](CHANGELOG.md)
+[![Open the app](https://img.shields.io/badge/open%20the%20app-online-d6b47a)](https://slickalex1.github.io/watch-together/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Runs in: Chrome, Edge, Firefox](https://img.shields.io/badge/runs%20in-Chrome%20%7C%20Edge%20%7C%20Firefox-555)](#quick-start)
 [![Works on: desktop and Android](https://img.shields.io/badge/works%20on-desktop%20%7C%20Android-555)](#quick-start)
+[![Installable app (PWA)](https://img.shields.io/badge/installable-PWA%20%7C%20works%20offline-555)](#install-it-as-an-app)
 [![Sound: AC-3, E-AC-3, DTS, TrueHD](https://img.shields.io/badge/sound-AC--3%20%7C%20E--AC--3%20%7C%20DTS%20%7C%20TrueHD-8a63d2)](#video-and-music-formats)
 [![WebRTC, end-to-end encrypted](https://img.shields.io/badge/WebRTC-end--to--end%20encrypted-2ea44f)](#privacy-and-security)
 [![No server, no account](https://img.shields.io/badge/server-none-2ea44f)](#privacy-and-security)
@@ -12,9 +14,11 @@
 [![Built with Claude](https://img.shields.io/badge/built%20with-Claude-d97757)](#credits)
 
 **Watch videos and listen to music in sync with a friend, browser to browser.**
-End-to-end encrypted. No server, no account, nothing to install.
+End-to-end encrypted. No server, no account, nothing you have to install.
 
-*Made by SlickAlex · powered by Claude · version 1.4.0 (beta) · [GPL-3.0](LICENSE)*
+**▶ [Open Watch together](https://slickalex1.github.io/watch-together/)** in Chrome, Edge or Firefox, or [download it](../../releases/latest) to use it from a folder.
+
+*Made by SlickAlex · powered by Claude · version 1.5.0 (beta) · [GPL-3.0](LICENSE)*
 
 ![Watch together playing a video, with a chat message flying across it and the shared playlist](docs/screenshots/player.png)
 
@@ -37,6 +41,7 @@ End-to-end encrypted. No server, no account, nothing to install.
 - **Subtitles.** `.srt` and `.vtt`, with adjustable size and timing.
 - **Invitations with a preview.** A picture and a friendly message that the other person pastes into the app.
 - **Works over the internet.** It connects directly when possible, or through a relay you choose. With a relay, IP addresses stay hidden.
+- **Online or from a folder.** Open it from its web address, install it like an app on your phone or computer (it then works without internet too), or download it and open it as a file.
 - **Notifications, picture-in-picture**, signal strength and data usage display, and keyboard shortcuts.
 
 | Music with cover art | On a phone | Invitation picture |
@@ -45,7 +50,11 @@ End-to-end encrypted. No server, no account, nothing to install.
 
 ## Quick start
 
-1. **Open the app.** Download the latest release (or this repository) and open **`app/index.html`** in Chrome, Edge or Firefox. On Android, open it through a file manager such as Cx File Explorer. Keep all the files of the `app` folder together.
+1. **Open the app.** Either:
+   - **Online:** open **https://slickalex1.github.io/watch-together/** in Chrome, Edge or Firefox. Nothing to download, and you can [install it](#install-it-as-an-app); or
+   - **From a folder:** download the [latest release](../../releases/latest) and open **`app/index.html`**. On Android, open it through a file manager such as Cx File Explorer. Keep all the files of the `app` folder together.
+
+   Both work the same way, and you can mix them: one person online, the other from a folder.
 2. **Add something to watch.** In the **Playlist** tab, add your videos or music.
 3. **Choose where the other person is** (Connect tab):
    - **Somewhere else (over the internet).** First set up a relay (**Step 1**, below). Between two homes, phones or countries, a direct connection fails more often than it works, and the relay also hides your IP address. You do this once.
@@ -56,7 +65,17 @@ End-to-end encrypted. No server, no account, nothing to install.
    3. The first person pastes the reply and taps **Connect**.
 5. **Compare the safety code** on a call. If it matches, nobody is in the middle, and chat unlocks.
 
-Both people should use the same version of the app; it's shown at the bottom of the page.
+Both people should use the same version of the app; it's shown at the bottom of the page. The online version is always the latest.
+
+## Install it as an app
+
+Opened online, Watch together can be installed like an app: it gets its own icon and a full-screen window, and opens even without internet.
+
+- **Android (Chrome, Edge, Samsung Internet):** Settings → **Install as an app** → **Install**, or the browser menu → **Install app** / **Add to Home screen**.
+- **iPhone and iPad:** in Safari, tap **Share** → **Add to Home Screen**.
+- **Computer (Chrome, Edge):** the install icon at the right of the address bar, or Settings → **Install as an app**.
+
+Updates arrive by themselves: the app checks for a newer version whenever it's opened with internet. To remove it, uninstall it like any other app.
 
 ## Step 1: set up a free relay (over the internet)
 
@@ -79,13 +98,15 @@ Not sure whether you need one? Tap **Check my connection**. If the app says your
 
 - **Everything between the two of you is encrypted end to end** (WebRTC: DTLS/SRTP): chat, reactions, playback commands and streams. The safety code proves no one is in the middle.
 - **No servers, no accounts, no tracking.** Videos never leave your device unless you stream them to the person you're connected to.
+- **The online version** is a plain page hosted by GitHub Pages. GitHub sees that your device loaded it, as with any website; after that, everything happens on your device and between the two of you.
 - **Locked-down page:** a strict Content Security Policy only allows the app's own code. The page can't contact any website.
 - **What others can see:**
   - The other person sees your IP address unless you use a relay.
   - Your relay provider and the optional STUN services see that two addresses are talking, but never what you share.
 - **Saved in your browser only:**
   - settings, watch positions and likes;
-  - relay details, if you choose.
+  - relay details, if you choose;
+  - online only: a copy of the app's own files, so it opens without internet.
 
   **Settings → Data saved in this browser** lists exactly what's stored right now and deletes all of it with one button. Your videos, music and chat are never saved, so there's nothing of them to delete.
 
@@ -126,19 +147,25 @@ When streaming, only the person who has the file needs a browser that can play i
   3. Make a new invitation.
   4. If it still fails, tap **Copy details for the developer** and paste the result into a [bug report](../../issues/new/choose). It contains no addresses or passwords.
 - **No sound from reactions on a phone:** tap the page once; phones only allow sound after a tap.
-- **Notifications on Android:** they need the page opened through an `http://localhost` address (Cx File Explorer does this).
+- **Notifications on Android:** they need the online version (or the installed app), or the page opened through an `http://localhost` address (Cx File Explorer does this). They don't work for a page opened as a file.
+- **The installed app shows an old version:** close it completely and open it again with internet.
 
 ## For developers
 
     src/index.template.html   the whole app: HTML, CSS and JavaScript
     src/build.py              builds app/index.html (python3 build.py; add --min for a smaller file)
     src/minify.py             small minifier used by --min
-    src/sw.js                 notification helper (service worker)
+    src/sw.js                 offline copy and notification helper (service worker)
+    src/manifest.webmanifest  makes the online version installable; icons in src/icons/
+    tools/make_icons.py       draws the icons
+    .github/workflows/pages.yml  publishes the app online (GitHub Pages) on every change
     src/audio-decoder.worker.js  background worker that converts sound (packed into app/audio-decoder.js)
     tools/audio-decoder/      the sound converter: C source, compiled WebAssembly, build script, test
     tests/                    smoke test, test media generator and a local test relay
 
 Always edit `src/index.template.html` and rebuild. The page's security policy contains hashes of its own code, so a hand-edited `app/index.html` won't run. See [CONTRIBUTING.md](CONTRIBUTING.md) and [tests/README.md](tests/README.md).
+
+**Your own online copy (forks):** in your fork, set **Settings → Pages → Source** to **GitHub Actions**. The workflow then publishes it at `https://<your-name>.github.io/<repository>/`, with your address in invitations.
 
 ## Legal
 

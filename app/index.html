@@ -17,10 +17,25 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-JuhsT7AT4adP+v7mp+Zue5wauJKxTCwTaaJyI68y7A0=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'sha256-faKRMJipwmBEsazKS7cZbOdIydRfzV15QAzo40UZwrw='; media-src blob:; img-src blob:; worker-src 'self' blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pgXNvJP5k59JBHe+PlpB6g2XY78XNYxBndPlFB8raPw=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'sha256-9jaQPFLkD3wTNtwUhqwjVlXapnwiH8y7J3xZg23d+Wg='; media-src blob:; img-src blob: 'self'; manifest-src 'self'; worker-src 'self' blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#16131b">
+<meta name="description" content="Watch videos and listen to music in sync with a friend, browser to browser. End-to-end encrypted, no account.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Watch together">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Watch together">
+<meta property="og:title" content="Watch together">
+<meta property="og:description" content="Watch videos and listen to music in sync with a friend, browser to browser. End-to-end encrypted, no account.">
+<meta property="og:url" content="https://slickalex1.github.io/watch-together/">
+<meta property="og:image" content="https://slickalex1.github.io/watch-together/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Watch together: watch videos and listen to music in sync with a friend">
+<meta name="twitter:card" content="summary_large_image">
 
 <title>Watch together</title>
 <style>
@@ -266,6 +281,7 @@ details.howto ol { padding-left: 1.2rem; margin: .5rem 0; }
 details.howto li { margin-bottom: .35rem; }
 details code { font: .8rem ui-monospace, "SF Mono", Consolas, monospace; color: var(--text); }
 a { color: var(--gold); }
+.hint a { overflow-wrap: anywhere; }
 .relay-test { margin-top: .6rem; }
 .chooser { margin-top: 1.1rem; }
 .netcheck { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: center; }
@@ -833,6 +849,11 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
         <p id="notifyNote" class="hint"></p>
         <p class="hint">Unread messages also show as a number in the browser tab, like "(2) Watch together".</p>
       </div>
+      <div class="section" id="installSec">
+        <h2>Install as an app</h2>
+        <p id="installText" class="hint"></p>
+        <div class="row"><button id="installBtn" type="button" class="primary" hidden>Install Watch together</button></div>
+      </div>
       <div class="section">
         <h2>Subtitles</h2>
         <label class="field" for="subSize">Size</label>
@@ -875,7 +896,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           <p><strong>Delete everything in the list above?</strong> The app then reloads as if opened for the first time. This only affects this browser on this device, not the other person's.<span id="wipeConn"> It also ends your current session.</span></p>
           <div class="row"><button id="wipeYes" type="button" class="ghost danger">Delete and reload</button><button id="wipeNo" type="button" class="ghost">Cancel</button></div>
         </div>
-        <p class="hint">The browser itself keeps its own record of permissions you gave this page (such as notifications). Change those in your browser's site settings.</p>
+        <p class="hint">The browser itself keeps its own record of permissions you gave this page (such as notifications). Change those in your browser's site settings. If you installed the app, deleting this data doesn't uninstall it; uninstall it like any other app.</p>
       </div>
     </div>
   </aside>
@@ -890,7 +911,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     <li>As the license says, SlickAlex isn't liable for how the app is used, or for any damage, data loss, costs (such as mobile data or relay charges) or other problems that come from using it.</li>
     <li>The app connects your device directly to the other person's. Only connect with people you trust: they can see your IP address and everything you share with them.</li>
     <li>Optional outside services you choose to use (Google's and Cloudflare's STUN servers, a TURN relay provider) have their own terms.</li>
-    <li>The app has no servers and collects nothing: no accounts, no tracking. Settings stay in this browser.</li>
+    <li>The app has no servers and collects nothing: no accounts, no tracking. Settings stay in this browser. If you use the online version, GitHub, which hosts it, sees that your device loaded the page, as with any website.</li>
   </ul>
   <p class="hint">Version <span id="termsVersion"></span>. Built with the help of Claude, an AI model by Anthropic. Anthropic isn't affiliated with or responsible for this app. See the LICENSE and NOTICE files that come with the app for the full text.</p>
   <div class="row"><button id="termsAccept" type="button" class="primary">I understand</button></div>
@@ -912,7 +933,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   const MAX_ITEMS = 100;
   const MAX_CHAT = 500;
   const MAX_NAME = 24;
-  const APP_VERSION = '1.4.0';
+  const APP_VERSION = '1.5.0';
   const IS_FIREFOX = /Firefox\//.test(navigator.userAgent);
   let userVol = 1, userMuted = false, wiping = false;   // volume is kept apart from the video element
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
@@ -1147,6 +1168,17 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   for (const b of tabButtons) b.addEventListener('click', () => showTab(b.dataset.tab));
   function renderUnread() { $('unread').hidden = unread === 0; $('unread').textContent = unread > 9 ? '9+' : String(unread); }
 
+  // Opened from a website (http or https) rather than as a file: the app can then be installed,
+  // works offline and shows notifications on Android. ON_SITE: a real website, not this device.
+  const ON_WEB = /^https?:$/.test(location.protocol);
+  const ON_SITE = ON_WEB && !/^(localhost|127\.|\[::1\]|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
+  const SITE_URL = 'https://slickalex1.github.io/watch-together/';   // the official online version, filled in by build.py (may be empty)
+  if (ON_WEB) {
+    for (const [rel, href] of [['manifest', 'manifest.webmanifest'], ['apple-touch-icon', 'icons/apple-touch-icon.png']]) {
+      const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
+    }
+  }
+
   // Tab icon: a gold play button, drawn here so no icon file is needed.
   (() => {
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#16131b"/><path d="M25 18l22 14-22 14z" fill="#d6b47a"/></svg>';
@@ -1180,7 +1212,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
 
   // ---------- notifications ----------
   // System notifications while the page is in the background. Android needs a service worker
-  // for them, which only works when the page is opened through http://localhost (as Cx File Explorer does).
+  // for them, which only works when the page is opened from a web address: the online version,
+  // the installed app, or http://localhost (as Cx File Explorer does). The same service worker
+  // keeps the offline copy of the app (see sw.js).
   const notifSupported = 'Notification' in window;
   let swReg = null, awayUnread = 0, baseTitle = 'Watch together';
   const pageAway = () => document.visibilityState !== 'visible' || !document.hasFocus();
@@ -1189,7 +1223,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   document.addEventListener('visibilitychange', backHere);
   window.addEventListener('focus', backHere);
   async function setupSW() {
-    if (swReg || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return swReg;
+    if (swReg || !('serviceWorker' in navigator) || !ON_WEB) return swReg;
     try { swReg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; }
     catch (_) { swReg = null; }
     return swReg;
@@ -1216,7 +1250,6 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const note = $('notifyNote');
     if (!$('notifyOn').checked) {
       note.textContent = 'Notifications are off.';
-      if (swReg) { swReg.unregister().catch(() => {}); swReg = null; }
       savePrefs(); return;
     }
     const fail = (msg) => { $('notifyOn').checked = false; note.textContent = msg; savePrefs(); };
@@ -1231,11 +1264,44 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const ok = await showNotification('Watch together', 'Notifications are on.', 'test');
     if (!ok) {
       return fail(location.protocol === 'file:'
-        ? "This browser can't show notifications for a page opened as a file. On Android, open it through Cx File Explorer (which uses an http://localhost address), then turn this on again."
+        ? "This browser can't show notifications for a page opened as a file. Use the online version (see Install as an app) or, on Android, open the file through Cx File Explorer, then turn this on again."
         : "This browser didn't allow notifications here.");
     }
     note.textContent = 'Notifications are on. You should have just received a test notification.';
     savePrefs();
+  });
+
+  // ---------- install as an app ----------
+  // Browsers offer installing only for pages opened from a website. The installed app opens in its
+  // own window with its own icon, and works without internet thanks to the copy kept by sw.js.
+  let installEvt = null;
+  const isInstalled = () => (window.matchMedia && matchMedia('(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)').matches) || navigator.standalone === true;
+  const isApple = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  function renderInstall() {
+    const t = $('installText'); t.textContent = '';
+    $('installBtn').hidden = !installEvt || isInstalled();
+    if (isInstalled()) { t.textContent = "You're using the installed app. To remove it, uninstall it like any other app."; return; }
+    if (!ON_WEB) {
+      const link = SITE_URL;
+      if (!link) { t.textContent = 'To install the app, open it from a website (an http or https address) instead of as a file.'; return; }
+      t.append('To install it as an app on your phone or computer, open the online version: ');
+      const a = document.createElement('a'); a.href = link; a.textContent = link; a.target = '_blank'; a.rel = 'noopener';
+      t.append(a, '. It\'s the same app.');
+      return;
+    }
+    const why = 'It gets its own icon and full-screen window, and opens even without internet. ';
+    if (installEvt) t.textContent = why + 'Tap the button to install it.';
+    else if (isApple()) t.textContent = why + 'On iPhone or iPad: in Safari, tap the Share button, then "Add to Home Screen".';
+    else if (/Firefox\//.test(navigator.userAgent) && !/Android/.test(navigator.userAgent)) t.textContent = why + 'Firefox on computers can\'t install apps; use Chrome or Edge for that. On Android, Firefox can: menu → "Add to Home screen".';
+    else t.textContent = why + 'Look in your browser\'s menu for "Install app" or "Add to Home screen". If it\'s not there, the app may already be installed.';
+  }
+  window.addEventListener('beforeinstallprompt', (e) => { installEvt = e; renderInstall(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; renderInstall(); toast('', 'Watch together is installed. You can open it from your home screen or apps.'); });
+  $('installBtn').addEventListener('click', async () => {
+    const e = installEvt; if (!e) return;
+    installEvt = null;
+    try { await e.prompt(); await e.userChoice; } catch (_) {}
+    renderInstall();
   });
 
   // ---------- peer connection ----------
@@ -1804,10 +1870,17 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
 
   // ---------- invitations: friendly message + preview picture ----------
   let lastOffer = null, cardFile = null, cardUrl = null, inviteTimer = null;
+  function appLink() {
+    if (ON_SITE) return location.origin + location.pathname.replace(/index\.html$/, '');
+    return SITE_URL;
+  }
   function inviteMessage(code, from, what) {
     const who = from ? `${from} invites you` : "You're invited";
+    const link = appLink();
     return `🎬 Watch together: ${who} to watch ${what ? `"${what}"` : 'something'} together.\n\n`
-      + '1. Open Watch together (the app folder I sent you).\n'
+      + (!link ? '1. Open Watch together (the app folder I sent you).\n'
+        : ON_SITE ? `1. Open Watch together: ${link}\n`
+          : `1. Open Watch together: ${link} (or the app folder I sent you).\n`)
       + '2. Tap "Join a session" and paste this whole message.\n'
       + '3. Send me the reply it gives you.\n\n' + code;
   }
@@ -3282,11 +3355,12 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const known = [PREFS_KEY, PROG_KEY, RATE_KEY, RELAY_KEY, RELAY_USE_KEY, TERMS_KEY];
     const other = keys.filter((k) => !known.includes(k)).length;
     if (other) add(`${other} other item${other === 1 ? '' : 's'} from an older version of the app`);
-    let regs = [];
+    let regs = [], copies = [];
     try { if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) regs = await navigator.serviceWorker.getRegistrations(); } catch (_) {}
-    if (regs.length) add('The small notification helper (installed when you turned on notifications)');
+    try { if (window.caches) copies = (await caches.keys()).filter((k) => k.startsWith('watch-together-')); } catch (_) {}
+    if (regs.length || copies.length) add("A copy of the app's own files, so it opens without internet, and the helper that keeps it and shows notifications. It's saved again the next time you open the app online.");
     if (!ul.children.length) add('Nothing at the moment.');
-    $('wipeBtn').disabled = !keys.length && !regs.length;
+    $('wipeBtn').disabled = !keys.length && !regs.length && !copies.length;
   }
   $('wipeBtn').addEventListener('click', () => { $('wipeConn').hidden = !connected; $('wipeConfirm').hidden = false; $('wipeBtn').hidden = true; });
   $('wipeNo').addEventListener('click', () => { $('wipeConfirm').hidden = true; $('wipeBtn').hidden = false; });
@@ -3297,6 +3371,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
         for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
       }
+      if (window.caches) for (const k of await caches.keys()) if (k.startsWith('watch-together-')) await caches.delete(k);
     } catch (_) {}
     if (pc) { try { pc.close(); } catch (_) {} }
     location.reload();
@@ -4432,10 +4507,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   updateWhere();
   applyVolume(); updateControls();
   requestAnimationFrame(moveInk);
-  if ($('notifyOn').checked) {
-    if (notifSupported && Notification.permission === 'granted') setupSW();
-    else $('notifyOn').checked = false;
-  }
+  if ($('notifyOn').checked && !(notifSupported && Notification.permission === 'granted')) $('notifyOn').checked = false;
+  if (ON_WEB) setupSW();   // offline copy (and notifications) when opened from a web address
+  renderInstall();
   if (!termsAccepted) openTerms();
   if (shuffleOn) rebuildShuffle();
   renderModes();

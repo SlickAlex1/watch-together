@@ -26,5 +26,6 @@ Out of scope:
 
 - **Encryption:** all traffic is end-to-end encrypted by WebRTC (DTLS/SRTP), and a safety code derived from both sides' certificates lets people detect someone in the middle.
 - **Content Security Policy:** a strict policy with SHA-256 hashes only allows the app's own code. The page can't load remote content or contact websites. The policy also allows WebAssembly and the app's own `audio-decoder.js` (loaded on demand) for converting sound; the converter runs in a background worker and only reads the file you picked.
+- **Online version:** the service worker only caches the app's own files and never sees your videos, music or chat. The page's policy allows its own web app manifest and icons, and nothing else from the site.
 - **Untrusted messages:** everything from the other side is validated, size-limited and rate-limited, and is never inserted as HTML.
 - **Relay access in invitations:** it's encrypted, time-limited and never stored. With TURN REST temporary logins, the password and secret key never leave your device.

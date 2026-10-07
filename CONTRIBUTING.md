@@ -22,6 +22,8 @@ Please don't post invitation or reply codes publicly. Report security problems p
 
    This writes `app/index.html` with a fresh Content Security Policy (hashes of the inline style and script), and packs `tools/audio-decoder/wt_audio.wasm` with `src/audio-decoder.worker.js` into `app/audio-decoder.js`. An edited `app/index.html` won't run without rebuilding.
 
+   It also copies the service worker, the web app manifest, the icons and the link preview picture. `--site-url` sets the online address used in invitations and link previews (the default is the official site; the publishing workflow passes your own site's address). To change the icons, edit and run `tools/make_icons.py`.
+
    To change the sound converter itself, edit `tools/audio-decoder/wt_audio.c` and run `tools/audio-decoder/build.sh` (see its README), then rebuild as above.
 3. Test (see [tests/README.md](tests/README.md)):
 
@@ -35,7 +37,8 @@ Please don't post invitation or reply codes publicly. Report security problems p
 - **Treat everything from the other side as untrusted:** validate it, limit its size, and never insert it as HTML (use `textContent`).
 - **No real movies, shows or music:** don't put copyrighted titles, posters or clips in code, examples, tests or screenshots. Use the synthetic test media.
 - **Plain language:** keep the interface text simple and clear.
-- **Version:** raise `APP_VERSION` in the template for each release, and add an entry to [CHANGELOG.md](CHANGELOG.md).
+- **Version:** raise `APP_VERSION` in the template for each release, and add an entry to [CHANGELOG.md](CHANGELOG.md). The version also names the offline copy, so installed apps switch to the new version cleanly.
+- **Online version:** pushing to `main` publishes the app on GitHub Pages automatically (`.github/workflows/pages.yml`).
 
 ## License
 

@@ -10,3 +10,5 @@ Thumbs.db
 *.zip
 # Sound converter build folder (tools/audio-decoder/build.sh)
 tools/audio-decoder/.work/
+# Site folder made by the publishing workflow
+_site/

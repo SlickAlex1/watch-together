@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0
+
+- **Online version:** the app is published at https://slickalex1.github.io/watch-together/, automatically, every time it changes. Nothing to download; you can still use it from a folder, and mix both.
+- **Install as an app:** opened online, it can be installed on phones and computers, with its own icon and full-screen window. Settings → **Install as an app** has a button or the steps for your device.
+- **Works offline:** the online version keeps a copy of its own files in your browser, so the installed app opens without internet. It always checks for a newer version first.
+- **Invitations include the link** to the online version, and the link shows a preview picture in chat apps.
+- **Notifications** now also work on Android in the online version and the installed app.
+- **Data saved in this browser** now also lists the offline copy, and deleting removes it too.
+
 ## 1.4.0
 
 - **Sound browsers can't play:**

@@ -27,6 +27,8 @@ These services are not part of Watch together and have their own terms. The proj
 
 Watch together has no servers of its own and sends no data to its authors. Settings, watch positions, likes and (only if you choose) relay details are stored in your own browser.
 
+The online version (https://slickalex1.github.io/watch-together/) is hosted by GitHub Pages. Like any website host, GitHub receives the requests your browser makes to load the app's files, including your IP address; see GitHub's privacy statement. The app itself then runs on your device, and keeps a copy of its own files in your browser so it also opens without internet. The project is not affiliated with GitHub.
+
 ## Third-party software
 
 The sound converter (`app/audio-decoder.js`, built from `tools/audio-decoder/`) contains parts of **FFmpeg 7.1** (demuxers and audio decoders), licensed under the GNU Lesser General Public License, version 2.1 or later: see [licenses/LGPL-2.1.txt](licenses/LGPL-2.1.txt). The FFmpeg source is available at https://github.com/FFmpeg/FFmpeg (tag `n7.1`), and `tools/audio-decoder/build.sh` rebuilds the converter from it. FFmpeg is a trademark of Fabrice Bellard.
