@@ -31,7 +31,7 @@ The online version (https://slickalex1.github.io/watch-together/) is hosted by G
 
 ## Third-party software
 
-The sound converter (`app/audio-decoder.js`, built from `tools/audio-decoder/`) contains parts of **FFmpeg 7.1** (demuxers and audio decoders), licensed under the GNU Lesser General Public License, version 2.1 or later: see [licenses/LGPL-2.1.txt](licenses/LGPL-2.1.txt). The FFmpeg source is available at https://github.com/FFmpeg/FFmpeg (tag `n7.1`), and `tools/audio-decoder/build.sh` rebuilds the converter from it. FFmpeg is a trademark of Fabrice Bellard.
+The sound converter (`app/audio-decoder.js`, built from `tools/audio-decoder/`) contains parts of **FFmpeg 7.1** (demuxers, parsers, audio decoders and the MP4 muxer), licensed under the GNU Lesser General Public License, version 2.1 or later: see [licenses/LGPL-2.1.txt](licenses/LGPL-2.1.txt). The FFmpeg source is available at https://github.com/FFmpeg/FFmpeg (tag `n7.1`), and `tools/audio-decoder/build.sh` rebuilds the converter from it. FFmpeg is a trademark of Fabrice Bellard.
 
 Some of the audio formats it decodes may be covered by patents in some countries.
 

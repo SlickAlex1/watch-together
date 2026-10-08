@@ -17,7 +17,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pgXNvJP5k59JBHe+PlpB6g2XY78XNYxBndPlFB8raPw=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'sha256-9jaQPFLkD3wTNtwUhqwjVlXapnwiH8y7J3xZg23d+Wg='; media-src blob:; img-src blob: 'self'; manifest-src 'self'; worker-src 'self' blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-BBM4ncUDgJIaRoID717d++rYnXk/u0ZFVPPC8ZD39lQ=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'sha256-Ew0hcKsfTS0YWlGeZWI/LS6sptCHJxxV9OhKsBiOYRY='; media-src blob:; img-src blob: 'self'; manifest-src 'self'; worker-src 'self' blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#16131b">
@@ -448,6 +448,7 @@ details.relay.attention { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(
 .audio-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .45rem; font-size: .875rem; }
 .audio-row select { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm); padding: .3rem .4rem; max-width: 100%; }
 .audio-row .hint { margin: 0; }
+.audio-row .pick { display: inline-flex; align-items: center; gap: .4rem; max-width: 100%; }
 .saved-list { margin: .3rem 0 .8rem; padding-left: 1.2rem; font-size: .875rem; }
 .saved-list li { margin-bottom: .25rem; }
 .wipe-confirm { margin-top: .7rem; padding: .7rem .85rem; border: 1px solid rgba(229,138,131,.5); border-radius: var(--r-sm); background: rgba(229,138,131,.07); font-size: .875rem; animation: unfold .22s ease-out; }
@@ -574,8 +575,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           <span id="peerRating" class="hint"></span>
         </div>
         <div id="audioRow" class="audio-row" hidden>
-          <label for="audioTrack">Audio</label>
-          <select id="audioTrack"></select>
+          <span id="audioPick" class="pick"><label for="audioTrack">Audio</label><select id="audioTrack"></select></span>
+          <span id="subPick" class="pick" hidden><label for="subTrack">Subtitles</label><select id="subTrack"></select></span>
           <span id="audioNote" class="hint"></span>
         </div>
         <p id="mediaWarn" class="hint"></p>
@@ -652,21 +653,21 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
           <details class="howto">
             <summary>How to get a free relay (about 2 minutes)</summary>
             <ol>
-              <li>Create a free account with a TURN provider, for example <a href="https://www.expressturn.com/" target="_blank" rel="noopener noreferrer">ExpressTURN</a> or <a href="https://www.metered.ca/tools/openrelay/" target="_blank" rel="noopener noreferrer">Metered Open Relay</a>.</li>
-              <li>In its dashboard, copy the TURN server address (for example <code>free.expressturn.com:3478</code>), the username and the password. You don't need a "secret key".</li>
+              <li>Create a free account with a TURN relay provider, for example <a href="https://www.metered.ca/tools/openrelay/" target="_blank" rel="noopener noreferrer">Metered Open Relay</a> (many providers have free plans).</li>
+              <li>In its dashboard, copy the TURN server address (it looks like <code>relay.example.com:3478</code>), the username and the password. You don't need a "secret key".</li>
               <li>Paste them below, exactly as shown. If the provider lists several addresses, paste them all, one per line.</li>
               <li>Click <strong>Test relay</strong>.</li>
             </ol>
           </details>
           <label class="field" for="turnUrls">Relay addresses, one per line</label>
-          <textarea id="turnUrls" class="code" rows="3" spellcheck="false" autocomplete="off" placeholder="free.expressturn.com:3478"></textarea>
+          <textarea id="turnUrls" class="code" rows="3" spellcheck="false" autocomplete="off" placeholder="relay.example.com:3478"></textarea>
           <label class="field" for="turnUser">Username</label>
           <input id="turnUser" class="text" type="text" autocomplete="off" spellcheck="false">
           <label class="field" for="turnPass">Password</label>
           <input id="turnPass" class="text" type="password" autocomplete="off">
           <details class="howto temp-logins">
             <summary>Temporary logins (stronger protection when sharing)</summary>
-            <p>If your relay supports temporary logins (the "TURN REST API": for example ExpressTURN's Premium "Secret Key", or your own coturn server), paste its secret key here. Invites then carry a login that <strong>the relay itself rejects</strong> once the time below runs out, and your password and secret key never leave your device. You can leave the password empty if you use this.</p>
+            <p>If your relay supports temporary logins (the "TURN REST API", often called a "secret key": some paid plans have it, and so does your own coturn server), paste its secret key here. Invites then carry a login that <strong>the relay itself rejects</strong> once the time below runs out, and your password and secret key never leave your device. You can leave the password empty if you use this.</p>
             <label class="field" for="turnSecret">Secret key (optional)</label>
             <input id="turnSecret" class="text" type="password" autocomplete="off">
           </details>
@@ -757,7 +758,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
         <option value="local">Own files only</option>
       </select>
       <p id="modeHint" class="hint"></p>
-      <p class="hint">Select all your episodes or songs at once. They're sorted by name and play in order. Music (MP3, M4A, FLAC, OGG, WAV) shows its cover art. Include .srt or .vtt files with matching names to attach subtitles.</p>
+      <p class="hint">Select all your episodes or songs at once. They're sorted by name and play in order. Music (MP3, M4A, FLAC, OGG, WAV) shows its cover art. Subtitles inside MKV and MP4 files are found by themselves; you can also include .srt or .vtt files with matching names.</p>
       <div class="row">
         <label class="filebtn">
           <input id="files" class="vh" type="file" multiple accept="video/*,audio/*,.mkv,.mp4,.webm,.m4v,.mov,.mp3,.m4a,.aac,.flac,.ogg,.oga,.opus,.wav,.srt,.vtt">
@@ -822,6 +823,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
         <label class="field" for="sfxVol">Reaction sound volume</label>
         <input id="sfxVol" class="vol sfx-vol" type="range" min="0" max="100" value="60" aria-label="Reaction sound volume">
         <label class="check"><input id="convertAudio" type="checkbox" checked><span>Convert sound the browser can't play (AC-3, E-AC-3, DTS, TrueHD and others, common in MKV movies). It happens on this device; nothing is uploaded.</span></label>
+        <label class="check"><input id="repackOn" type="checkbox"><span>Smoother MKV videos: repackage them as MP4 while they play (recommended in Firefox, whose MKV support is new). The picture isn't re-encoded or changed, and nothing is uploaded.</span></label>
         <label class="check"><input id="rememberPos" type="checkbox" checked><span>Remember where you stopped in each episode, and which ones you've watched (saved only in this browser)</span></label>
         <div class="row settings-row"><button id="clearPosBtn" type="button" class="ghost small">Forget saved positions</button><span id="clearPosNote" class="hint"></span></div>
         <p class="hint">Settings on this tab are remembered in this browser.</p>
@@ -933,7 +935,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   const MAX_ITEMS = 100;
   const MAX_CHAT = 500;
   const MAX_NAME = 24;
-  const APP_VERSION = '1.5.0';
+  const APP_VERSION = '1.6.0';
   const IS_FIREFOX = /Firefox\//.test(navigator.userAgent);
   let userVol = 1, userMuted = false, wiping = false;   // volume is kept apart from the video element
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
@@ -1323,7 +1325,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const urls = [];
     for (let u of raw) {
       if (BARE_HOST_RE.test(u)) u = 'turn:' + u;
-      if (!TURN_URL_RE.test(u)) throw new Error(`"${u.slice(0, 60)}" isn't a relay address. Paste the server address exactly as your relay provider shows it, for example free.expressturn.com:3478`);
+      if (!TURN_URL_RE.test(u)) throw new Error(`"${u.slice(0, 60)}" isn't a relay address. Paste the server address exactly as your relay provider shows it, for example relay.example.com:3478`);
       const add = /^turn:/.test(u) && !/\?transport=/.test(u) ? [u + '?transport=udp', u + '?transport=tcp'] : [u];
       for (const a of add) if (!urls.includes(a)) urls.push(a);
     }
@@ -1681,7 +1683,6 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
 
   function resetSession(status) {
     clearInterval(pingTimer); clearInterval(hbTimer); clearInterval(presenceTimer); clearInterval(statsTimer);
-    if (streamOut && v.captureStream) streamOut.cap.getTracks().forEach((t) => t.stop());
     streamOut = null; routeViaRelay = false; peer.quality = 'medium';
     lastBytes = { sent: 0, recv: 0 }; $('dataNow').hidden = true; $('dataInfo').textContent = '';
     clearReply();
@@ -2326,8 +2327,28 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     || (peer.list.filter((x) => sameLength(x.d, it.dur)).length === 1 && items.filter((y) => sameLength(y.dur, it.dur)).length === 1);
   const shortName = (it) => it.name.replace(/\.[^.]+$/, '');
 
+  // Chrome lets only one capture of the video element carry its sound: capturing it again, or
+  // stopping an older capture, silences the newer one, and every capture keeps picking up each
+  // new file. So in Chrome the element is captured once and never stopped; the stream gets fresh
+  // tracks for each file (added when the file's details load), which are tracked here.
+  let capStream = null, capTracks = { audio: null, video: null };
+  v.addEventListener('loadstart', () => { capTracks = { audio: null, video: null }; });
+  function capTrack(cap, kind) {
+    if (v.captureStream) return capTracks[kind] && capTracks[kind].readyState === 'live' ? capTracks[kind] : null;
+    return (kind === 'video' ? cap.getVideoTracks()[0] : cap.getAudioTracks()[0]) || null;
+  }
   function captureMedia() {
-    if (v.captureStream) return v.captureStream();
+    if (v.captureStream) {
+      if (!capStream) {
+        capStream = v.captureStream();
+        capStream.getTracks().forEach((t) => { capTracks[t.kind] = t; });
+        capStream.addEventListener('addtrack', (e) => {
+          capTracks[e.track.kind] = e.track;
+          refreshStreamTracks(); soundWatchAttach();
+        });
+      }
+      return capStream;
+    }
     // Firefox stops playing the element's own sound once it's captured, so play it separately.
     const cap = v.mozCaptureStream();
     ffCaptured = true;
@@ -2361,20 +2382,22 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     if (want) { if (!streamOut || streamOut.token !== loadToken) await startStream(it); }
     else if (streamOut) await stopStream(true);
   }
+  let streamStarting = -1;
   async function startStream(it) {
     const { vt, at } = mediaTransceivers();
     if (!vt || !at) return;
+    streamStarting = loadToken;
     let cap;
     try { cap = captureMedia(); }
     catch (_) { setTag($('mediaWarn'), "Couldn't capture this video for streaming.", 'bad'); return; }
-    const video = cap.getVideoTracks()[0] || null;
-    const audio = (alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : cap.getAudioTracks()[0]) || null;
+    const video = capTrack(cap, 'video');
+    const audio = (alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : capTrack(cap, 'audio')) || null;
     if (video && 'contentHint' in video) video.contentHint = 'motion';
     const old = streamOut;
     try { await vt.sender.replaceTrack(video); await at.sender.replaceTrack(audio); }
     catch (_) { setTag($('mediaWarn'), "Couldn't start streaming this video.", 'bad'); return; }
-    if (old && v.captureStream) old.cap.getTracks().forEach((t) => t.stop());
     streamOut = { h: it.hash, token: loadToken, cap };
+    refreshStreamTracks();   // in case the file's tracks were added while this was starting
     await applyQuality();
     lastSubSent = null;
     const pieces = it.kind === 'audio' ? await artPieces(it) : [];
@@ -2391,7 +2414,6 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   async function stopStream(notify) {
     const { vt, at } = mediaTransceivers();
     try { if (vt) await vt.sender.replaceTrack(null); if (at) await at.sender.replaceTrack(null); } catch (_) {}
-    if (streamOut && v.captureStream) streamOut.cap.getTracks().forEach((t) => t.stop());
     streamOut = null;
     if (notify) send({ type: 'stream', on: false });
   }
@@ -2427,7 +2449,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     if (!streamIn || streamIn.h !== h) notify('stream', `${partnerName()} is streaming`, name);
     loadToken++; loading = false;
     if (streamOut) stopStream(false);
-    if (cur >= 0) { cur = -1; if (curUrl) { URL.revokeObjectURL(curUrl); curUrl = null; } v.removeAttribute('src'); }
+    if (cur >= 0) { cur = -1; repackStop(); if (curUrl) { URL.revokeObjectURL(curUrl); curUrl = null; } v.removeAttribute('src'); }
     const { vt, at } = mediaTransceivers();
     streamIn = { h, name, d, audio: !!music.audio, title: music.title || '', artist: music.artist || '' };
     resetRxArt();
@@ -2616,7 +2638,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   });
 
   // Settings remembered between visits (this browser only).
-  const PREF_CHECKS = ['convertAudio', 'autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
+  const PREF_CHECKS = ['convertAudio', 'repackOn', 'autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
   const PREF_SELECTS = { shareHours: ['3', '6', '12', '24'], subSize: ['0.8', '1', '1.25', '1.55'], streamQuality: ['high', 'medium', 'low'], playMode: ['auto', 'stream', 'local'] };
   function savePrefs() {
     if (wiping) return;
@@ -3046,13 +3068,19 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   // (muted) video. The video element stays the clock; audio follows it.
   const ALT_FILES = /\.(mkv|mk3d|mp4|m4v|mov|avi|ts|m2ts|mts|wmv|asf|flv|webm)$/i;
   const CODEC_NAMES = { ac3: 'AC-3', eac3: 'E-AC-3', dts: 'DTS', truehd: 'TrueHD', mlp: 'MLP', aac: 'AAC', mp3: 'MP3', mp2: 'MP2',
-    flac: 'FLAC', opus: 'Opus', vorbis: 'Vorbis', alac: 'ALAC', wmav1: 'WMA', wmav2: 'WMA', wmapro: 'WMA Pro' };
+    flac: 'FLAC', opus: 'Opus', vorbis: 'Vorbis', alac: 'ALAC', wmav1: 'WMA', wmav2: 'WMA', wmapro: 'WMA Pro',
+    wmalossless: 'WMA Lossless', wmavoice: 'WMA Voice', wavpack: 'WavPack', tta: 'TTA', ape: "Monkey's Audio", mp1: 'MP1',
+    amrnb: 'AMR', amrwb: 'AMR-WB', adpcm_ms: 'ADPCM', adpcm_ima_wav: 'ADPCM', cook: 'RealAudio', atrac3: 'ATRAC3',
+    ra_144: 'RealAudio', ra_288: 'RealAudio', pcm_alaw: 'A-law', pcm_mulaw: 'µ-law' };
   const NATIVE_TEST = { aac: 'audio/mp4; codecs="mp4a.40.2"', mp3: 'audio/mpeg', opus: 'audio/webm; codecs="opus"',
     vorbis: 'audio/webm; codecs="vorbis"', flac: 'audio/flac', ac3: 'audio/mp4; codecs="ac-3"', eac3: 'audio/mp4; codecs="ec-3"' };
   const codecLabel = (c) => CODEC_NAMES[c] || (/^pcm/.test(c) ? 'PCM' : String(c).toUpperCase());
+  // Some Android phones report AC-3 / E-AC-3 support through their own decoders, which can go
+  // silent after jumping; converting is more reliable there. Safari's own decoders are fine.
+  const IS_SAFARI = /Safari\//.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS|Android/.test(navigator.userAgent);
   function nativeAudio(codec) {
     const t = NATIVE_TEST[codec];
-    if (!t) return false;
+    if (!t || ((codec === 'ac3' || codec === 'eac3') && !IS_SAFARI)) return false;
     try { return v.canPlayType(t) !== ''; } catch (_) { return false; }
   }
   const langNames = (() => { try { return new Intl.DisplayNames([navigator.language || 'en', 'en'], { type: 'language' }); } catch (_) { return null; } })();
@@ -3086,63 +3114,78 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const url = URL.createObjectURL(new Blob([lib.worker], { type: 'text/javascript' }));
     const w = new Worker(url);
     let n = 0;
-    const wait = new Map();
+    const wait = new Map(), client = { dead: false };
+    // A crashed decoder, or one stuck far longer than any normal step takes, is thrown away;
+    // whoever was waiting gets an error and the next call starts a fresh one.
+    const fail = (msg) => {
+      if (client.dead) return;
+      client.dead = true;
+      try { w.terminate(); } catch (_) {}
+      for (const p of wait.values()) { clearTimeout(p.timer); p.rej(new Error(msg)); }
+      wait.clear();
+      if (alt.client === client) alt.client = null;
+    };
     w.onmessage = (e) => {
       const p = wait.get(e.data.id);
       if (!p) return;
-      wait.delete(e.data.id);
+      wait.delete(e.data.id); clearTimeout(p.timer);
       if (e.data.error) p.rej(new Error(e.data.error)); else p.res(e.data);
     };
-    w.onerror = (e) => { e.preventDefault(); for (const p of wait.values()) p.rej(new Error('decoder stopped')); wait.clear(); alt.client = null; };
-    const call = (cmd, data, transfer) => new Promise((res, rej) => {
+    w.onerror = (e) => { e.preventDefault(); fail('decoder stopped'); };
+    client.call = (cmd, data, transfer, ms) => new Promise((res, rej) => {
+      if (client.dead) { rej(new Error('decoder stopped')); return; }
       const id = ++n;
-      wait.set(id, { res, rej });
+      wait.set(id, { res, rej, timer: setTimeout(() => fail('decoder stuck'), ms || 20000) });
       w.postMessage(Object.assign({ id, cmd }, data), transfer || []);
     });
+    client.kill = () => fail('decoder restarted');
     const bin = atob(lib.wasm), bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const ready = call('init', { wasm: bytes.buffer }, [bytes.buffer]).finally(() => URL.revokeObjectURL(url));
-    return { call, ready };
+    client.ready = client.call('init', { wasm: bytes.buffer }, [bytes.buffer], 60000).finally(() => URL.revokeObjectURL(url));
+    return client;
   }
 
   const alt = { client: null, openFor: null, item: null, active: false, tracks: [], nativeIdx: -1, track: -1, rate: 48000,
     queue: [], decoding: false, ended: false, gen: 0, lastEnd: null, needAnchor: true, anchorCtx: 0, anchorMedia: 0,
-    rateAt: 1, sources: [], mix: null, gain: null, dest: null, timer: null, drift: [], ticks: 0, tapHint: false };
+    rateAt: 1, sources: [], mix: null, gain: null, dest: null, timer: null, drift: [], ticks: 0, tapHint: false,
+    openClient: null, decodeErrors: 0, fails: [], recovering: false, wasPlaying: false, playAt: 0, okAt: 0 };
 
   async function altClient() {
-    if (!alt.client) alt.client = makeDecoderWorker(await loadDecoderLib());
-    await alt.client.ready;
-    return alt.client;
+    if (!alt.client || alt.client.dead) alt.client = makeDecoderWorker(await loadDecoderLib());
+    const c = alt.client;
+    await c.ready;
+    return c;
   }
   async function altOpen(it) {
     const c = await altClient();
-    if (alt.openFor !== it) {
+    if (alt.openFor !== it || alt.openClient !== c) {
       alt.openFor = null;
-      const r = await c.call('open', { file: it.file });
-      alt.openFor = it;
+      const r = await c.call('open', { file: it.file }, null, 60000);
+      alt.openFor = it; alt.openClient = c;
       it.media = r.info;
     }
     return c;
   }
   // What audio does this file have, and can the browser play it? Runs while the video loads.
   async function altPrepare(it, token) {
-    altStop();
+    altStop(); soundWatchStop();
     alt.tracks = []; alt.nativeIdx = -1;
     renderAudioRow();
     if (it.kind === 'audio' || !ALT_FILES.test(it.name)) return;
     try { await altOpen(it); } catch (_) { return; }
     if (token !== loadToken || !it.media) return;
+    subsPrepare(it);
     const tracks = it.media.streams.filter((x) => x.type === 'audio');
     alt.tracks = tracks;
     if (!tracks.length) return;
     // Browsers play a file's first audio track.
-    alt.nativeIdx = nativeAudio(tracks[0].codec) ? tracks[0].index : -1;
+    alt.nativeIdx = !it.repack && nativeAudio(tracks[0].codec) ? tracks[0].index : -1;
     let want = it.audioChoice;
     if (want === undefined || !tracks.some((x) => x.index === want)) {
       want = alt.nativeIdx >= 0 ? alt.nativeIdx : (tracks.find((x) => x.default && x.decodable) || tracks.find((x) => x.decodable) || tracks[0]).index;
     }
     renderAudioRow();
-    if (want === alt.nativeIdx) return;
+    if (want === alt.nativeIdx && !it.forceConvert) { soundWatchStart(it); return; }
     if (!$('convertAudio').checked) {
       setTag($('mediaWarn'), `This video's sound (${codecLabel(tracks[0].codec)}) is a format this browser can't play. Turn on "Convert sound the browser can't play" in Settings.`, 'warn');
       return;
@@ -3163,6 +3206,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
         if (ctx.createMediaStreamDestination) { alt.dest = ctx.createMediaStreamDestination(); alt.mix.connect(alt.dest); }
       }
       alt.item = it; alt.track = index; alt.rate = r.rate; alt.active = true;
+      alt.decodeErrors = 0; alt.wasPlaying = false;
       altReset(true);
       applyVolume(); renderAudioRow(); refreshStreamAudio();
       if (!alt.timer) alt.timer = setInterval(altTick, 100);
@@ -3190,15 +3234,19 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     alt.gen++; alt.queue = []; alt.ended = false; alt.lastEnd = null; alt.needAnchor = true;
     if (seek && alt.client) alt.client.call('seek', { t: Math.max(0, v.currentTime - 0.1) }).catch(() => {});
   }
+  let decodeCall = 0;
   function altFill() {
-    if (alt.decoding || alt.ended || !alt.client) return;
+    if (alt.decoding || alt.ended || alt.recovering) return;
+    if (!alt.client || alt.client.dead) { if (alt.active) altRecover(); return; }
     const last = alt.queue[alt.queue.length - 1];
     if (last && last.end - v.currentTime > 5 * Math.max(1, v.playbackRate)) return;
-    alt.decoding = true;
+    const id = ++decodeCall;
+    alt.decoding = id;
     const gen = alt.gen;
     alt.client.call('decode', { seconds: 1.5 }).then((r) => {
-      alt.decoding = false;
+      if (alt.decoding === id) alt.decoding = false;
       if (gen !== alt.gen || !alt.active) return;
+      alt.decodeErrors = 0;
       if (r.end) { alt.ended = true; return; }
       const len = r.l.length, dur = len / alt.rate;
       // Consecutive chunks join sample-exactly (container timestamps can be off by a millisecond).
@@ -3208,7 +3256,31 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       alt.queue.push({ start, end: start + dur, l: r.l, r: r.r, len, scheduled: false });
       altSchedule();
       altFill();
-    }).catch(() => { alt.decoding = false; });
+    }).catch(() => {
+      if (alt.decoding === id) alt.decoding = false;
+      if (gen !== alt.gen || !alt.active) return;
+      if (++alt.decodeErrors >= 2 || !alt.client) altRecover();
+    });
+  }
+  // If the decoder gets stuck or stops (phones short of memory can do this), start a fresh one
+  // and carry on from the same spot. If that keeps happening, stop and say so.
+  function altRecover() {
+    if (!alt.active || alt.recovering) return;
+    const now = performance.now();
+    alt.fails = alt.fails.filter((t) => now - t < 60000);
+    alt.fails.push(now);
+    if (alt.fails.length > 3) {
+      alt.fails = [];
+      altStop(); renderAudioRow();
+      setTag($('mediaWarn'), "The converted sound keeps stopping on this device. Reloading the page may help; converting the file to MP4 with AAC sound always works (see the README).", 'bad');
+      return;
+    }
+    const it = alt.item, track = alt.track, token = loadToken;
+    alt.recovering = true;
+    altStopSources(); alt.queue = []; alt.gen++;
+    if (alt.client) alt.client.kill();
+    alt.client = null; alt.openFor = null; alt.decoding = false;
+    altStart(it, track, token).finally(() => { alt.recovering = false; });
   }
   const outLatency = (ctx) => (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
   // When should the sound for media time m start, on the audio clock?
@@ -3252,15 +3324,23 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     const playing = !v.paused && !v.seeking && !v.ended && v.readyState >= 3 && !buffering;
     if (!playing) {
       if (alt.sources.length) altStopSources();
-      alt.needAnchor = true;
+      alt.needAnchor = true; alt.wasPlaying = false;
       altFill();
       return;
     }
     if (ctx.state !== 'running') {
       ctx.resume().catch(() => {});
+      // Phones may pause web audio again (calls, other apps): the next tap brings it back.
+      armAudioUnlock();
       if (!alt.tapHint) { alt.tapHint = true; toast(null, 'Tap anywhere on the page to turn the sound on.'); }
+      alt.wasPlaying = false;
       return;
     }
+    // Playing, yet no sound scheduled for a while: the decoder is stuck, so restart it.
+    const now = performance.now();
+    if (!alt.wasPlaying) { alt.wasPlaying = true; alt.playAt = now; }
+    if (alt.sources.length) alt.okAt = now;
+    else if (!alt.ended && !alt.recovering && now - Math.max(alt.okAt, alt.playAt) > 8000) { altRecover(); return; }
     if (Math.abs((v.playbackRate || 1) - alt.rateAt) > 0.001) alt.needAnchor = true;
     if (alt.needAnchor) altAnchor(ctx);
     else if (++alt.ticks % 10 === 0 && alt.sources.length) {
@@ -3281,37 +3361,448 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   function refreshStreamAudio() {
     if (!streamOut || !pc) return;
     const { at } = mediaTransceivers();
-    const track = alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : streamOut.cap.getAudioTracks()[0];
+    const track = alt.active && alt.dest ? alt.dest.stream.getAudioTracks()[0] : capTrack(streamOut.cap, 'audio');
     if (at) at.sender.replaceTrack(track || null).catch(() => {});
+  }
+  // Chrome adds the new file's tracks to the capture a moment after it loads.
+  function refreshStreamTracks() {
+    if (!streamOut || !pc || (streamOut.token !== loadToken && streamStarting !== loadToken)) return;
+    const { vt } = mediaTransceivers();
+    if (vt) vt.sender.replaceTrack(capTrack(streamOut.cap, 'video')).catch(() => {});
+    refreshStreamAudio();
   }
   function renderAudioRow() {
     const it = curItem(), row = $('audioRow'), sel = $('audioTrack');
-    const show = !!it && !streamIn && (alt.tracks.length > 1 || alt.active);
-    row.hidden = !show;
-    if (!show) return;
+    const showAudio = !!it && !streamIn && (alt.tracks.length > 1 || alt.active);
+    const subOpts = it && !streamIn ? subOptions(it) : [];
+    $('audioPick').hidden = !showAudio;
+    $('subPick').hidden = subOpts.length < 2;
+    renderSubPick(it, subOpts);
+    row.hidden = !showAudio && subOpts.length < 2;
+    if (!showAudio) { $('audioNote').textContent = subNote(it); return; }
     sel.textContent = '';
     alt.tracks.forEach((t, i) => {
       const o = document.createElement('option');
       o.value = String(t.index);
-      o.textContent = trackLabel(t, i) + (t.index === alt.nativeIdx ? '' : t.decodable ? ' (converted)' : " (can't play)");
+      o.textContent = trackLabel(t, i) + (alt.active && t.index === alt.track ? ' (converted)' : t.index === alt.nativeIdx ? '' : t.decodable ? ' (converted)' : " (can't play)");
       o.disabled = t.index !== alt.nativeIdx && !t.decodable;
       sel.appendChild(o);
     });
     sel.value = String(alt.active ? alt.track : alt.nativeIdx >= 0 ? alt.nativeIdx : '');
-    $('audioNote').textContent = alt.active ? 'Converted on this device' : '';
+    $('audioNote').textContent = [alt.active ? 'Sound converted on this device' : '', subNote(it)].filter(Boolean).join(' · ');
   }
   $('audioTrack').addEventListener('change', () => {
     const it = curItem(), idx = Number($('audioTrack').value);
     if (!it || !Number.isInteger(idx)) return;
     it.audioChoice = idx;
-    if (idx === alt.nativeIdx) { altStop(); renderAudioRow(); }
+    if (idx === alt.nativeIdx && !it.forceConvert) { altStop(); renderAudioRow(); soundWatchStart(it); }
     else altStart(it, idx, loadToken);
   });
   $('convertAudio').addEventListener('change', () => {
     const it = curItem();
-    if (!$('convertAudio').checked) { altStop(); renderAudioRow(); }
+    if (!$('convertAudio').checked) { altStop(); soundWatchStop(); renderAudioRow(); }
     else if (it) { setTag($('mediaWarn'), ''); altPrepare(it, loadToken); }
   });
+
+  // ---------- subtitles inside the video file ----------
+  // MKV and MP4 files often carry subtitles. Text ones (SRT, ASS/SSA, WebVTT, MP4 timed text) are
+  // read by audio-decoder.js in a background worker of their own: they're spread through the whole
+  // file, so it reads from a little before where you're watching to the end, then the part before
+  // that, and shows them as they arrive. Picture subtitles (PGS, VobSub) are listed but can't be shown.
+  const TEXT_SUBS = /^(subrip|srt|ass|ssa|webvtt|mov_text|text)$/;
+  const isTextSub = (t) => !!t && TEXT_SUBS.test(t.codec);
+  const SUB_NAMES = { subrip: 'SRT', ass: 'ASS', ssa: 'SSA', webvtt: 'WebVTT', mov_text: 'text', text: 'text',
+    hdmv_pgs_subtitle: 'PGS', dvd_subtitle: 'VobSub', dvb_subtitle: 'DVB' };
+  const subScan = { client: null, openFor: null, it: null, gen: 0, span: null };
+  function subLabel(t, i) {
+    return [langLabel(t.lang) || `Subtitles ${i + 1}`, cleanText(t.title, 60, false), SUB_NAMES[t.codec] || String(t.codec).toUpperCase()]
+      .filter(Boolean).join(' · ');
+  }
+  function subsPrepare(it) {
+    it.subTracks = (it.media.streams || []).filter((x) => x.type === 'subtitle');
+    if (!it.subStore) it.subStore = new Map();
+    if (it.subChoice === undefined) {
+      const def = it.subTracks.find((x) => x.default && isTextSub(x));
+      it.subChoice = it.extCues ? 'ext' : def ? def.index : 'off';
+    }
+    applySubChoice(it);
+  }
+  function subOptions(it) {
+    const o = [];
+    if (!(it.subTracks || []).length && !it.extCues) return o;
+    o.push(['off', 'Off', false]);
+    if (it.extCues) o.push(['ext', 'From the subtitle file', false]);
+    (it.subTracks || []).forEach((t, i) => o.push([String(t.index), subLabel(t, i) + (isTextSub(t) ? '' : " (pictures, can't show yet)"), !isTextSub(t)]));
+    return o;
+  }
+  function renderSubPick(it, opts) {
+    const sel = $('subTrack');
+    sel.textContent = '';
+    for (const [value, label, off] of opts) {
+      const el = document.createElement('option');
+      el.value = value; el.textContent = label; el.disabled = off;
+      sel.appendChild(el);
+    }
+    if (it && opts.length) sel.value = String(it.subChoice === undefined ? 'off' : it.subChoice);
+  }
+  function subNote(it) {
+    if (!it || !Number.isInteger(it.subChoice) || it.subsDone) return '';
+    if (it.subsFailed) return "Couldn't read this file's subtitles";
+    const d = (it.media && it.media.duration) || 0;
+    if (!d) return 'Reading subtitles…';
+    let covered = 0;
+    for (const sp of it.subSpans || []) covered += Math.max(0, Math.min(sp[1], d) - Math.max(0, sp[0]));
+    return `Reading subtitles… ${Math.min(99, Math.round(covered / d * 100))}%`;
+  }
+  function applySubChoice(it) {
+    const c = it.subChoice;
+    if (c === 'ext') it.cues = it.extCues || null;
+    else if (Number.isInteger(c)) { it.cues = buildCues(it, c); if (!it.subsDone && subScan.it !== it) subsScanStart(it, (v.currentTime || 0) - 10); }
+    else it.cues = null;
+    if (it === curItem()) { lastSubText = null; renderAudioRow(); updateControls(); renderPlaylist(); }
+  }
+  $('subTrack').addEventListener('change', () => {
+    const it = curItem(), val = $('subTrack').value;
+    if (!it) return;
+    it.subChoice = val === 'off' || val === 'ext' ? val : Number(val);
+    if (val !== 'off') subsOn = true;
+    applySubChoice(it);
+  });
+  function subCueText(codec, raw) {
+    let t = raw;
+    if (codec === 'ass' || codec === 'ssa') {
+      if (/\{[^}]*\\p[1-9]/.test(t)) return '';                   // drawings, not words
+      let i = 0;                                                      // skip ReadOrder,Layer,Style,Name,MarginL,MarginR,MarginV,Effect,
+      for (let k = 0; k < 8 && i >= 0; k++) { const j = t.indexOf(',', i); i = j < 0 ? -1 : j + 1; }
+      if (i > 0) t = t.slice(i);
+      t = t.replace(/\{[^}]*\}/g, '').replace(/\\N/gi, '\n').replace(/\\h/g, ' ');
+    } else {
+      t = t.replace(/\{\\[^}]*\}/g, '').replace(/<[^>]*>/g, '');
+    }
+    t = t.replace(/\r/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').trim();
+    return t.slice(0, 500);
+  }
+  const subDecoder = new TextDecoder();
+  let subRebuild = null;
+  function addCues(it, buf) {
+    if (!buf) return;
+    const dv = new DataView(buf.buffer || buf, buf.byteOffset || 0, buf.byteLength);
+    const codecs = new Map((it.subTracks || []).map((t) => [t.index, t.codec]));
+    for (let p = 0; p + 24 <= dv.byteLength; ) {
+      const idx = dv.getInt32(p, true), start = dv.getFloat64(p + 4, true), end = dv.getFloat64(p + 12, true), len = dv.getInt32(p + 20, true);
+      if (len < 0 || p + 24 + len > dv.byteLength) break;
+      const text = subCueText(codecs.get(idx), subDecoder.decode(new Uint8Array(dv.buffer, dv.byteOffset + p + 24, len)));
+      p += 24 + len;
+      if (!text || !Number.isFinite(start)) continue;
+      if (!it.subStore.has(idx)) it.subStore.set(idx, new Map());
+      const store = it.subStore.get(idx);
+      if (store.size < 50000) store.set(Math.round(start * 1000) + '|' + text.slice(0, 40), [start, end, text]);
+    }
+    if (!subRebuild) subRebuild = setTimeout(() => {
+      subRebuild = null;
+      if (Number.isInteger(it.subChoice)) it.cues = buildCues(it, it.subChoice);
+      if (it === curItem()) { lastSubText = null; renderAudioRow(); updateControls(); }
+    }, 300);
+  }
+  // Cues sorted by start; a missing end becomes the next line's start (at most 5 s later).
+  function buildCues(it, idx) {
+    const arr = [...((it.subStore && it.subStore.get(idx)) || new Map()).values()].map((c) => c.slice()).sort((a, b) => a[0] - b[0]);
+    for (let i = 0; i < arr.length; i++) {
+      if (!(arr[i][1] > arr[i][0])) arr[i][1] = Math.min(arr[i][0] + 5, i + 1 < arr.length ? arr[i + 1][0] : Infinity);
+    }
+    return arr;
+  }
+  // The next stretch not read yet: from `from` on, then from the start.
+  function nextSubGap(it, from) {
+    const spans = (it.subSpans || []).slice().sort((a, b) => a[0] - b[0]);
+    const end = (it.media && it.media.duration) || Infinity;
+    for (const start of [Math.max(0, from), 0]) {
+      let a = start;
+      for (const sp of spans) if (sp[0] <= a + 0.5 && sp[1] > a) a = sp[1];
+      if (a === Infinity || a >= end - 0.5) continue;
+      const later = spans.filter((sp) => sp[0] > a).map((sp) => sp[0]);
+      return [a, later.length ? Math.min(...later) : Infinity];
+    }
+    return null;
+  }
+  function subsScanStop() { subScan.gen++; subScan.it = null; subScan.span = null; }
+  async function subsScanStart(it, t) {
+    const gen = ++subScan.gen;
+    subScan.it = it; subScan.span = null;
+    if (!it.subSpans) it.subSpans = [];
+    try {
+      if (!subScan.client || subScan.client.dead) { subScan.client = makeDecoderWorker(await loadDecoderLib()); subScan.openFor = null; }
+      const c = subScan.client;
+      await c.ready;
+      if (gen !== subScan.gen) return;
+      if (subScan.openFor !== it) { subScan.openFor = null; await c.call('open', { file: it.file }, null, 60000); subScan.openFor = it; }
+      let from = Math.max(0, t);
+      for (;;) {
+        if (gen !== subScan.gen) return;
+        const gap = nextSubGap(it, from);
+        if (!gap) { it.subsDone = true; break; }
+        await c.call('sstart', { t: gap[0] }, null, 30000);
+        const span = [gap[0], gap[0]];
+        it.subSpans.push(span); subScan.span = span;
+        for (;;) {
+          const r = await c.call('sread', { max: 300, stopAt: Number.isFinite(gap[1]) ? gap[1] : 0 }, null, 180000);
+          if (gen !== subScan.gen) return;
+          addCues(it, r.buf);
+          span[1] = Math.max(span[1], r.at);
+          if (r.end) { span[1] = Infinity; break; }
+          if (Number.isFinite(gap[1]) && r.at >= gap[1]) { span[1] = gap[1]; break; }
+        }
+        from = 0;
+      }
+    } catch (_) {
+      if (gen === subScan.gen) it.subsFailed = true;
+    }
+    if (gen !== subScan.gen) return;
+    subScan.it = null; subScan.span = null;
+    // Everything's read: the background reader isn't needed any more.
+    if (subScan.client) { subScan.client.kill(); subScan.client = null; subScan.openFor = null; }
+    if (it === curItem()) renderAudioRow();
+  }
+  // A jump to a part that hasn't been read yet (and won't be soon): read from there first.
+  v.addEventListener('seeked', () => {
+    const it = curItem(), sp = subScan.span;
+    if (!it || subScan.it !== it || it.subsDone) return;
+    const t = v.currentTime;
+    const covered = (it.subSpans || []).some((s) => t >= s[0] && t < s[1]);
+    if (!covered && !(sp && t >= sp[0] && t < sp[1] + 60)) subsScanStart(it, t - 10);
+  });
+
+  // ---------- smoother MKV playback: repackaging as MP4 ----------
+  // Firefox's MKV support is new, and it plays MKV files less smoothly than MP4. With "Smoother
+  // MKV videos" on, the video track of an MKV file is copied, unchanged, into MP4 pieces by
+  // audio-decoder.js (in a background worker of its own), a little ahead of where the video is,
+  // and played through the browser's MediaSource player (the one streaming sites use). The
+  // sound then always comes from the app's sound converter. If anything goes wrong, the file
+  // plays the usual way.
+  const REPACK_FILES = /\.(mkv|mk3d)$/i;
+  const rp = { client: null, item: null, ms: null, sb: null, url: null, gen: 0, busy: false, ended: false,
+    startT: 0, next: -1, shift: 0, dur: 0, timer: null };
+  const repackWanted = (it) => $('repackOn').checked && $('convertAudio').checked && !it.noRepack && it.kind !== 'audio'
+    && REPACK_FILES.test(it.name) && typeof MediaSource !== 'undefined';
+  async function repackClient() {
+    if (!rp.client || rp.client.dead) rp.client = makeDecoderWorker(await loadDecoderLib());
+    const c = rp.client;
+    await c.ready;
+    return c;
+  }
+  function repackStop() {
+    rp.gen++; rp.busy = false; rp.ended = false;
+    clearInterval(rp.timer); rp.timer = null;
+    if (rp.url) URL.revokeObjectURL(rp.url);
+    rp.url = null; rp.ms = null; rp.sb = null; rp.item = null;
+  }
+  async function repackStart(it, token) {
+    try {
+      const c = await repackClient();
+      const r = await c.call('open', { file: it.file }, null, 60000);
+      if (token !== loadToken) return false;
+      const info = r.info, audio = info.streams.filter((x) => x.type === 'audio');
+      if (!it.media) it.media = info;
+      if (!info.streams.some((x) => x.type === 'video') || (audio.length && !audio.some((x) => x.decodable))) return false;
+      const st = await c.call('vstart', { t: 0 }, null, 30000);
+      const mime = `video/mp4; codecs="${st.codec}"`;
+      // H.264 and HEVC carry their colour details inside the video itself, so they look exactly the
+      // same repackaged. (Tests use VP9, which this browser build can play; self.__wtRepackAnyCodec.)
+      const codecOk = /^(avc1|hev1|hvc1)\./.test(st.codec || '') || self.__wtRepackAnyCodec === true;
+      if (token !== loadToken || !codecOk || !MediaSource.isTypeSupported(mime)) return false;
+      const ms = new MediaSource();
+      rp.gen++;
+      Object.assign(rp, { item: it, ms, url: URL.createObjectURL(ms), ended: false, busy: false, startT: 0, next: -1, shift: st.shift, dur: info.duration || 0 });
+      v.src = rp.url;
+      await new Promise((res, rej) => {
+        ms.addEventListener('sourceopen', res, { once: true });
+        setTimeout(() => rej(new Error('the video player didn\'t start')), 8000);
+      });
+      if (token !== loadToken || rp.ms !== ms) return false;
+      if (rp.dur > 0) ms.duration = rp.dur;
+      rp.sb = ms.addSourceBuffer(mime);
+      rp.sb.mode = 'segments';
+      rp.sb.timestampOffset = -rp.shift;
+      await rpAppend(st.init);
+      clearInterval(rp.timer);
+      rp.timer = setInterval(rpPump, 1000);
+      rpPump();
+      return true;
+    } catch (_) {
+      if (token === loadToken) { repackStop(); v.removeAttribute('src'); }
+      return false;
+    }
+  }
+  // The buffered stretch of video that contains time t, as [start, end], or null.
+  function rpRange(t) {
+    let b;
+    try { b = rp.sb && rp.sb.buffered; } catch (_) { return null; }
+    if (!b) return null;
+    for (let i = 0; i < b.length; i++) if (t >= b.start(i) - 0.3 && t < b.end(i)) return [b.start(i), b.end(i)];
+    return null;
+  }
+  const rpIdle = () => new Promise((res) => {
+    if (!rp.sb || !rp.sb.updating) { res(); return; }
+    rp.sb.addEventListener('updateend', () => res(), { once: true });
+  });
+  async function rpAppend(data, retried) {
+    await rpIdle();
+    const sb = rp.sb;
+    if (!sb) throw new Error('stopped');
+    try {
+      await new Promise((res, rej) => {
+        const done = () => { sb.removeEventListener('updateend', done); sb.removeEventListener('error', bad); res(); };
+        const bad = () => { sb.removeEventListener('updateend', done); sb.removeEventListener('error', bad); rej(new Error('the browser refused part of the video')); };
+        sb.addEventListener('updateend', done); sb.addEventListener('error', bad);
+        sb.appendBuffer(data);
+      });
+    } catch (e) {
+      // Out of room: forget what's already been watched, then try once more.
+      if (e && e.name === 'QuotaExceededError' && !retried && v.currentTime > 3) {
+        sb.remove(0, Math.max(0.1, v.currentTime - 3));
+        return rpAppend(data, true);
+      }
+      throw e;
+    }
+  }
+  // Keep about 30 seconds ready ahead of the current position, and forget what's well behind.
+  async function rpPump() {
+    if (!rp.sb || rp.busy || v.error) return;
+    const t = v.currentTime, r = rpRange(t);
+    if (r) {
+      if (r[1] - t > 30) {
+        if (!rp.sb.updating && r[0] < t - 40) { try { rp.sb.remove(0, t - 30); } catch (_) {} }
+        return;
+      }
+      // Watching a stretch that this isn't adding to (an earlier one, after a jump back): continue it.
+      if (rp.next >= 0 && Math.abs(r[1] - rp.next) > 1) {
+        if (!(rp.dur && r[1] >= rp.dur - 0.5)) rpRestart(Math.max(0, r[1] - 0.5));
+        return;
+      }
+    } else {
+      // Nothing ready here: either it's still coming (just started, or playback caught up), or this is a new spot.
+      const coming = rp.next < 0 ? Math.abs(t - rp.startT) <= 1.5 : t >= rp.startT - 1 && t <= rp.next + 2;
+      if (!coming) { rpRestart(t); return; }
+    }
+    if (rp.ended) return;
+    const gen = rp.gen;
+    rp.busy = true;
+    try {
+      const res = await rp.client.call('vread', { seconds: 5 }, null, 30000);
+      if (gen !== rp.gen) return;
+      if (res.data) await rpAppend(res.data);
+      if (gen !== rp.gen) return;
+      const now = rpRange(rp.next > 0 ? rp.next - 0.05 : rp.startT) || rpRange(rp.startT);
+      if (now) rp.next = now[1];
+      if (res.end) { rp.ended = true; await rpIdle(); if (gen === rp.gen && rp.ms.readyState === 'open') rp.ms.endOfStream(); }
+    } catch (e) {
+      if (gen === rp.gen) { rp.busy = false; rpFail(); }
+      return;
+    }
+    if (gen === rp.gen) { rp.busy = false; setTimeout(rpPump, 0); }
+  }
+  // After a jump outside what's ready: start again at the keyframe before the new position.
+  async function rpRestart(t) {
+    const gen = ++rp.gen;
+    Object.assign(rp, { busy: true, ended: false, startT: t, next: -1 });
+    try {
+      await rpIdle();
+      if (gen !== rp.gen) return;
+      if (rp.ms.readyState === 'open') { rp.sb.abort(); rp.sb.timestampOffset = -rp.shift; }
+      const st = await rp.client.call('vstart', { t }, null, 30000);
+      if (gen !== rp.gen) return;
+      await rpAppend(st.init);
+      if (gen !== rp.gen) return;
+      rp.busy = false;
+      rpPump();
+    } catch (_) {
+      if (gen === rp.gen) { rp.busy = false; rpFail(); }
+    }
+  }
+  function rpFail() {
+    const it = rp.item;
+    repackStop();
+    if (!it || curItem() !== it) return;
+    it.noRepack = true;
+    toast(null, "Smoother playback didn't work for this video, so it plays the usual way.");
+    loadItem(cur, { t: v.currentTime || 0, play: !v.paused });
+  }
+  v.addEventListener('seeking', () => { if (rp.sb && !rpRange(v.currentTime)) rpRestart(v.currentTime); });
+  v.addEventListener('error', () => { if (rp.sb && rp.item && curItem() === rp.item) rpFail(); });
+  $('repackOn').addEventListener('change', () => {
+    const it = curItem();
+    if (it && REPACK_FILES.test(it.name) && !streamIn) loadItem(cur, { t: v.currentTime || 0, play: !v.paused });
+  });
+
+  // ---------- when a video's own sound stops after a jump ----------
+  // Some phones' built-in decoders go quiet after jumping in some files (seen with MKV on Android).
+  // While a video file plays its own sound, the app listens to it on this device (nothing is sent
+  // anywhere). If there was sound before a jump and complete silence for several seconds after,
+  // it switches to converting the sound itself. Chrome and Edge only: they can listen without
+  // side effects.
+  const sw = { it: null, an: null, src: null, track: null, buf: null, timer: null, heardAt: 0, jumpAt: 0, quietMs: 0, lastAt: 0, aBytes: -1 };
+  function soundWatchStop() {
+    clearInterval(sw.timer); sw.timer = null;
+    if (sw.src) { try { sw.src.disconnect(); } catch (_) {} }
+    sw.src = null; sw.track = null; sw.it = null;
+  }
+  function soundWatchStart(it) {
+    soundWatchStop();
+    const counts = 'webkitAudioDecodedByteCount' in v;
+    if ((!v.captureStream && !counts) || !it || it.kind === 'audio' || !$('convertAudio').checked) return;
+    const t = alt.tracks.find((x) => x.index === alt.nativeIdx);
+    if (!t || !t.decodable) return;
+    if (v.captureStream) { try { captureMedia(); } catch (_) {} }
+    Object.assign(sw, { it, heardAt: 0, jumpAt: 0, quietMs: 0, lastAt: performance.now(), aBytes: -1 });
+    soundWatchAttach();
+    sw.timer = setInterval(soundWatchTick, 250);
+  }
+  function soundWatchAttach() {
+    if (!sw.it || !actx) return;
+    const t = capTracks.audio;
+    if (!t || t === sw.track || t.readyState !== 'live') return;
+    if (sw.src) { try { sw.src.disconnect(); } catch (_) {} }
+    try {
+      if (!sw.an) { sw.an = actx.createAnalyser(); sw.an.fftSize = 2048; sw.buf = new Float32Array(2048); }
+      sw.src = actx.createMediaStreamSource(new MediaStream([t]));
+      sw.src.connect(sw.an); sw.track = t;
+    } catch (_) { sw.src = null; }
+  }
+  function soundWatchTick() {
+    const now = performance.now(), dt = now - sw.lastAt;
+    sw.lastAt = now;
+    if (!sw.it || sw.it !== curItem() || alt.active || streamIn) { soundWatchStop(); return; }
+    if (!sw.src) soundWatchAttach();
+    const playing = !v.paused && !v.seeking && !v.ended && v.readyState >= 3 && !buffering;
+    if (!playing) return;
+    // Two signs: the sound itself (listened to through the capture), and whether the browser is
+    // still decoding any audio at all (Chrome's decoded-bytes counter stops when its decoder dies).
+    let sound = null;
+    if (sw.src && actx && actx.state === 'running') {
+      sw.an.getFloatTimeDomainData(sw.buf);
+      let peak = 0;
+      for (let i = 0; i < sw.buf.length; i += 2) peak = Math.max(peak, Math.abs(sw.buf[i]));
+      sound = peak > 0.002;
+    }
+    if ('webkitAudioDecodedByteCount' in v) {
+      const b = v.webkitAudioDecodedByteCount, moved = sw.aBytes >= 0 && b !== sw.aBytes;
+      sw.aBytes = b;
+      if (!moved) { if (sound !== true) sound = false; } else if (sound === null) sound = true;
+    }
+    if (sound === null) return;
+    if (sound) { sw.heardAt = now; sw.quietMs = 0; return; }
+    // Only right after a jump, and only if the video had sound before it.
+    if (!sw.jumpAt || !sw.heardAt || sw.heardAt > sw.jumpAt) return;
+    sw.quietMs += dt;
+    if (sw.quietMs > 6000) {
+      const it = sw.it;
+      soundWatchStop();
+      it.forceConvert = true;
+      toast(null, "The video's sound stopped after the jump, so the app now plays the sound itself.");
+      altStart(it, alt.nativeIdx, loadToken);
+    }
+  }
+  v.addEventListener('seeked', () => { if (sw.it) { sw.jumpAt = performance.now(); sw.quietMs = 0; } });
 
   // ---------- smooth playback check ----------
   // If the browser keeps dropping frames, say so (and why), instead of leaving people guessing.
@@ -3327,8 +3818,11 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     smooth.token = loadToken;
     const it = curItem(), vs = it && it.media && it.media.streams.find((x) => x.type === 'video');
     const heavy = vs && (/hevc|h265/i.test(vs.codec) || /10/.test(vs.profile || ''));
-    setTag($('mediaWarn'), IS_FIREFOX
-      ? "This video isn't playing smoothly in Firefox (it's skipping frames). Chrome or Edge usually play MKV files more smoothly; converting the file to MP4 also helps (see the README)."
+    const mkvNotRepacked = it && REPACK_FILES.test(it.name) && !it.repack;
+    setTag($('mediaWarn'), IS_FIREFOX && mkvNotRepacked && !$('repackOn').checked
+      ? "This video isn't playing smoothly in Firefox (it's skipping frames). Turn on \"Smoother MKV videos\" in Settings, or use Chrome or Edge."
+      : IS_FIREFOX && mkvNotRepacked
+        ? "This video isn't playing smoothly in Firefox (it's skipping frames). Chrome or Edge usually play this kind of MKV more smoothly; converting it to MP4 also helps (see the README)."
       : heavy
         ? "This video isn't playing smoothly: its format (HEVC or 10-bit) is heavy for this device. Converting it to MP4 with H.264 helps (see the README)."
         : "This video isn't playing smoothly (the browser is skipping frames). Closing other tabs and apps can help; converting the file to MP4 helps most (see the README).", 'warn');
@@ -3448,10 +3942,13 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     loading = true;
     expect.play = expect.pause = expect.seeked = 0;
     if (curUrl) URL.revokeObjectURL(curUrl);
+    curUrl = null;
+    repackStop(); subsScanStop();
     cur = idx;
-    curUrl = URL.createObjectURL(it.file);
-    v.src = curUrl;
     $('stage').classList.remove('empty'); $('emptyMsg').hidden = true;
+    it.repack = repackWanted(it) ? await repackStart(it, token) : false;
+    if (token !== loadToken) return;
+    if (!it.repack) { curUrl = URL.createObjectURL(it.file); v.src = curUrl; }
     altPrepare(it, token);
     showArt(it.kind === 'audio', { url: it.art && it.art.url, title: itemTitle(it), artist: it.tags && it.tags.artist });
     setTag($('mediaWarn'), ''); audioChecked = false; $('subtitle').textContent = '';
@@ -3564,6 +4061,24 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     else if (a < 0.8) setTag($('syncInfo'), `Fine-tuning (${a.toFixed(2)} s off)`, 'warn');
     else setTag($('syncInfo'), `Resyncing (${a.toFixed(1)} s off)`, 'warn');
   }
+  // Jump-only sync (Firefox, converted sound): on phones a jump in a big file can take a while,
+  // so the video lands late and the next check would jump again, making the picture stutter.
+  // So: wait a few seconds between jumps, aim ahead by how late the last jump landed, and if
+  // this device keeps falling behind, accept a bigger gap instead of jumping again and again.
+  const jumpSync = { last: 0, lead: 0, landed: false, times: [] };
+  function jumpFix(diff, expected, now) {
+    if (jumpSync.landed && Math.abs(diff) < 2) {        // how far off did the last jump land?
+      jumpSync.lead = clamp(jumpSync.lead - diff * 0.7, 0, 1.5);
+      jumpSync.landed = false;
+    }
+    jumpSync.times = jumpSync.times.filter((t) => now - t < 60000);
+    const limit = jumpSync.times.length >= 3 ? 1 : 0.35;
+    if (Math.abs(diff) <= limit || now - jumpSync.last < 4000) return;
+    jumpSync.last = now; jumpSync.times.push(now); jumpSync.landed = true;
+    seekTo(expected + (v.paused ? 0 : jumpSync.lead));
+  }
+  v.addEventListener('emptied', () => { jumpSync.lead = 0; jumpSync.times = []; jumpSync.landed = false; });
+
   // The guest follows the host's clock. Small drift is fixed by briefly speeding up
   // or slowing down (unnoticeable); big jumps are fixed with a seek.
   function onHeartbeat(m) {
@@ -3585,8 +4100,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     // Converted audio, and Firefox's pitch correction, don't like constant speed changes: there,
     // only jump when the gap is noticeable. Elsewhere, nudge the speed by at most 6%.
     const seekOnly = alt.active || IS_FIREFOX;
-    if (Math.abs(diff) > (seekOnly ? 0.3 : 0.6)) { applyRate(1); seekTo(expected); }
-    else if (seekOnly) applyRate(1);
+    if (seekOnly) { applyRate(1); if (m.p) jumpFix(diff, expected, now); else if (Math.abs(diff) > 0.1) seekTo(expected); }
+    else if (Math.abs(diff) > 0.6) { applyRate(1); seekTo(expected); }
     else if (m.p && Math.abs(diff) > 0.04) applyRate(1 - clamp(diff * 0.4, -0.06, 0.06));
     else { if (!m.p && Math.abs(diff) > 0.1) seekTo(expected); applyRate(1); }
   }
@@ -3646,7 +4161,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     setTimeout(() => {
       if (audioChecked || v.paused || token !== loadToken) return;
       audioChecked = true;
-      if (alt.active) return;
+      if (alt.active || (curItem() && curItem().repack)) return;
       const chromeNoAudio = 'webkitAudioDecodedByteCount' in v && v.webkitAudioDecodedByteCount === 0 && v.webkitVideoDecodedByteCount > 0;
       const firefoxNoAudio = v.mozHasAudio === false;
       if (!(chromeNoAudio || firefoxNoAudio)) return;
@@ -3715,7 +4230,20 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     applyVolume(); updateControls();
   }
   $('muteBtn').addEventListener('click', toggleMute);
-  function toggleSubs() { subsOn = !subsOn; if (!subsOn) $('subtitle').textContent = ''; updateControls(); }
+  function toggleSubs() {
+    const it = curItem();
+    if (it && (!subsOn || it.subChoice === 'off') && !streamIn) {
+      subsOn = true;
+      if (it.subChoice === 'off' || it.subChoice === undefined) {
+        const first = it.extCues ? 'ext' : ((it.subTracks || []).find(isTextSub) || {}).index;
+        if (first !== undefined) { it.subChoice = first; applySubChoice(it); }
+      }
+    } else {
+      subsOn = !subsOn;
+      if (!subsOn) $('subtitle').textContent = '';
+    }
+    updateControls(); renderAudioRow();
+  }
   $('ccBtn').addEventListener('click', toggleSubs);
 
   const seekEl = $('seek');
@@ -3752,9 +4280,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     $('prevBtn').disabled = streamIn ? false : cur < 0;
     $('nextBtn').disabled = streamIn ? false : (cur < 0 || items.length < 2 || (!shuffleOn && loopMode !== 'all' && cur >= items.length - 1));
     const it = curItem();
-    $('ccBtn').disabled = !(it && it.cues) && !streamIn;
+    $('ccBtn').disabled = !(it && (it.cues || it.extCues || (it.subTracks || []).some(isTextSub))) && !streamIn;
     syncSideAudio();
-    $('ccBtn').setAttribute('aria-pressed', subsOn ? 'true' : 'false');
+    $('ccBtn').setAttribute('aria-pressed', subsOn && (streamIn || (it && it.cues)) ? 'true' : 'false');
     const level = userMuted || userVol === 0 ? 'mute' : userVol < 0.34 ? 'low' : userVol < 0.67 ? 'mid' : 'high';
     $('muteBtn').dataset.level = level;
     $('muteBtn').setAttribute('aria-label', (level === 'mute' ? 'Unmute' : 'Mute') + ' (M)');
@@ -3826,7 +4354,11 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   });
 
   // ---------- reaction sounds: synthesized live with Web Audio (no sound files, nothing downloaded) ----------
-  let actx = null, sfxOut = null, noiseBuf = null, sfxActive = 0;
+  let actx = null, sfxOut = null, noiseBuf = null, sfxEnds = [], sfxTapHint = false;
+  // Phones and browsers can pause web audio at any time (screen off, another app, a call), and
+  // some only let it start again after a tap. So whenever it isn't running, the next tap anywhere
+  // starts it again ("interrupted" is the newer browsers' name for paused by the system).
+  function armAudioUnlock() { UNLOCK_EVENTS.forEach((e) => document.addEventListener(e, unlockAudio, true)); }
   function sfxCtx() {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -3836,8 +4368,9 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       noiseBuf = actx.createBuffer(1, actx.sampleRate * 2, actx.sampleRate);
       const d = noiseBuf.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      actx.addEventListener('statechange', () => { if (actx.state !== 'running') armAudioUnlock(); });
     }
-    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    if (actx.state !== 'running' && actx.state !== 'closed') { actx.resume().catch(() => {}); armAudioUnlock(); }
     sfxOut.gain.value = Number($('sfxVol').value) / 100 * 0.8;
     return actx;
   }
@@ -3957,7 +4490,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   ];
   // Phones keep web audio locked until the page is touched; unlock it on the first tap so
   // reactions from the other person can be heard later, even without touching the screen again.
-  const UNLOCK_EVENTS = ['pointerdown', 'touchend', 'keydown'];
+  // On touch screens, a touch counts as a tap for sound only when the finger lifts (pointerup/touchend/click).
+  const UNLOCK_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
   function unlockAudio() {
     const c = sfxCtx();
     if (!c) return;
@@ -3970,14 +4504,27 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   }
   UNLOCK_EVENTS.forEach((e) => document.addEventListener(e, unlockAudio, true));
   function playSfx(i) {
-    if (!$('sfxOn').checked || !SFX[i] || sfxActive >= 4) return;
-    try {
-      if (!sfxCtx()) return;
-      const dur = SFX[i](actx.currentTime + 0.02);
-      sfxActive++;
-      setTimeout(() => { sfxActive = Math.max(0, sfxActive - 1); }, dur * 1000 + 100);
-    } catch (_) {}
+    if (!$('sfxOn').checked || !SFX[i]) return;
+    const c = sfxCtx();
+    if (!c) return;
+    const go = () => {
+      // At most 4 at once. Counted on the audio clock: timers slow down in the background.
+      sfxEnds = sfxEnds.filter((t) => t > c.currentTime);
+      if (sfxEnds.length >= 4) return;
+      try { sfxEnds.push(c.currentTime + 0.02 + SFX[i](c.currentTime + 0.02)); } catch (_) {}
+    };
+    if (c.state === 'running') { go(); return; }
+    // Sound is paused: try to start it, and play only if that works right away (not later, all at once).
+    const asked = performance.now();
+    c.resume().then(() => { if (c.state === 'running' && performance.now() - asked < 800) go(); }).catch(() => {});
+    if (!sfxTapHint) {
+      sfxTapHint = true;
+      setTimeout(() => { if (c.state !== 'running') toast(null, 'Tap anywhere on the page to hear reaction sounds.'); }, 900);
+    }
   }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && actx && actx.state !== 'running' && actx.state !== 'closed') actx.resume().catch(() => { armAudioUnlock(); });
+  });
   $('sfxVol').addEventListener('input', () => {
     $('sfxVol').style.setProperty('--p', $('sfxVol').value + '%');
     if (sfxOut) sfxOut.gain.value = Number($('sfxVol').value) / 100 * 0.8;
@@ -4238,7 +4785,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
       if (!target && subFiles.length === 1 && pool.length === 1) target = pool[0];
       if (!target && subFiles.length === 1 && !added.length && curItem()) target = curItem();
       const cues = target ? await readSubs(sf) : null;
-      if (target && cues) target.cues = cues; else unmatched++;
+      if (target && cues) { target.cues = target.extCues = cues; target.subChoice = 'ext'; } else unmatched++;
     }
     items = items.concat(added);
     const bad = added.filter((x) => !x.playable).length;
@@ -4269,7 +4816,8 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     if (!it) { setTag($('plInfo'), 'Start an episode first, then add its subtitles.', 'warn'); return; }
     const cues = await readSubs(f);
     if (!cues) { setTag($('plInfo'), 'No subtitles found in that file. Use .srt or .vtt (max 5 MB).', 'bad'); return; }
-    it.cues = cues; subsOn = true;
+    it.cues = it.extCues = cues; it.subChoice = 'ext'; subsOn = true;
+    renderAudioRow();
     setTag($('plInfo'), `Subtitles added to ${it.name}.`);
     renderPlaylist(); updateControls();
   });
@@ -4302,6 +4850,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
     if (shuffleOn) rebuildShuffle();
     if (i === cur) {
       cur = -1; loadToken++; loading = false;
+      repackStop();
       v.removeAttribute('src'); v.load();
       if (curUrl) { URL.revokeObjectURL(curUrl); curUrl = null; }
       $('stage').classList.add('empty'); $('emptyMsg').hidden = false; $('subtitle').textContent = '';
@@ -4473,8 +5022,10 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   }
   let lastSubText = '';
   function renderSubs() {
-    requestAnimationFrame(renderSubs);
     const it = curItem();
+    // Every frame only while there are subtitles to time; otherwise a few checks a second.
+    if ((it && it.cues && cur >= 0) || streamIn) requestAnimationFrame(renderSubs);
+    else setTimeout(renderSubs, 250);
     let text = '';
     if (it && it.cues && cur >= 0 && !streamIn) {
       const t = v.currentTime - subDelay, cues = it.cues;
@@ -4500,6 +5051,7 @@ textarea.invite-text { min-height: 9rem; font: .85rem/1.45 var(--sans); word-bre
   loadRelay();
   loadProgress();
   loadRatings();
+  $('repackOn').checked = IS_FIREFOX;
   loadPrefs();
   showModeHint();
   $('appVersion').textContent = 'v' + APP_VERSION; $('termsVersion').textContent = APP_VERSION;

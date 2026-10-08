@@ -16,6 +16,16 @@ MEDIA = HERE / 'media'
 EPS = [str(MEDIA / f'Demo.S01E0{i}.webm') for i in (1, 2, 3)] + [str(MEDIA / 'Demo.S01E01.en.srt')]
 results = []
 
+# How loud is the sound this page receives from the other person? (0 = silence)
+LEVEL = """(async () => {
+  const s = document.getElementById('v').srcObject; if (!s || !s.getAudioTracks().length) return 0;
+  const c = new AudioContext(); await c.resume(); const a = c.createAnalyser(); a.fftSize = 2048;
+  c.createMediaStreamSource(new MediaStream(s.getAudioTracks())).connect(a);
+  const d = new Float32Array(2048); let p = 0;
+  for (let i = 0; i < 100; i++) { await new Promise(r => setTimeout(r, 10)); a.getFloatTimeDomainData(d); for (const x of d) p = Math.max(p, Math.abs(x)); }
+  c.close(); return p; })()"""
+
+
 def check(name, ok, detail=''):
     results.append(ok)
     print(('PASS ' if ok else 'FAIL ') + name + (f'  ({detail})' if detail else ''))
@@ -93,6 +103,16 @@ async def main():
         t = await third.evaluate(STATE)
         frames = await third.evaluate("document.getElementById('v').getVideoPlaybackQuality().totalVideoFrames")
         check('streams to someone without the file', t[3] and frames > 10, f'{frames} frames received')
+        # its sound arrives too, also after moving on to the next file (Chrome only lets one
+        # capture of a video carry sound, which once silenced every file after the first)
+        await host2.set_input_files('#files', EPS[1:2]); await asyncio.sleep(1)
+        await host2.locator('#playlist li').nth(1).click(); await asyncio.sleep(1)
+        if await host2.evaluate("document.getElementById('v').paused"): await host2.click('#playBtn')
+        await asyncio.sleep(2)
+        for _ in range(6):                       # allow a slow machine a few seconds
+            level = await third.evaluate(LEVEL)
+            if level > 0.02: break
+        check('streamed sound arrives, also after the next file starts', level > 0.02, f'level {level:.2f}')
 
         # strict security policy: the real page runs with no violations
         strict_errors = []

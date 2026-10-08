@@ -1,7 +1,7 @@
 # Watch together
 
 [![Status: beta](https://img.shields.io/badge/status-beta-orange)](CHANGELOG.md)
-[![Version 1.5.0](https://img.shields.io/badge/version-1.5.0-d6b47a)](CHANGELOG.md)
+[![Version 1.6.0](https://img.shields.io/badge/version-1.6.0-d6b47a)](CHANGELOG.md)
 [![Open the app](https://img.shields.io/badge/open%20the%20app-online-d6b47a)](https://slickalex1.github.io/watch-together/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Runs in: Chrome, Edge, Firefox](https://img.shields.io/badge/runs%20in-Chrome%20%7C%20Edge%20%7C%20Firefox-555)](#quick-start)
@@ -18,7 +18,7 @@ End-to-end encrypted. No server, no account, nothing you have to install.
 
 **▶ [Open Watch together](https://slickalex1.github.io/watch-together/)** in Chrome, Edge or Firefox, or [download it](../../releases/latest) to use it from a folder.
 
-*Made by SlickAlex · powered by Claude · version 1.5.0 (beta) · [GPL-3.0](LICENSE)*
+*Made by SlickAlex · powered by Claude · version 1.6.0 (beta) · [GPL-3.0](LICENSE)*
 
 ![Watch together playing a video, with a chat message flying across it and the shared playlist](docs/screenshots/player.png)
 
@@ -38,7 +38,7 @@ End-to-end encrypted. No server, no account, nothing you have to install.
   - Encrypted messages, with replies.
   - **Bullet chat**: messages fly across the video.
   - **Reactions with sound**: applause, boo, laughter and more.
-- **Subtitles.** `.srt` and `.vtt`, with adjustable size and timing.
+- **Subtitles.** The ones inside MKV and MP4 files (SRT, ASS/SSA, WebVTT, MP4 text) appear in a **Subtitles** menu, and you can add `.srt` and `.vtt` files. Size and timing are adjustable.
 - **Invitations with a preview.** A picture and a friendly message that the other person pastes into the app.
 - **Works over the internet.** It connects directly when possible, or through a relay you choose. With a relay, IP addresses stay hidden.
 - **Online or from a folder.** Open it from its web address, install it like an app on your phone or computer (it then works without internet too), or download it and open it as a file.
@@ -81,8 +81,8 @@ Updates arrive by themselves: the app checks for a newer version whenever it's o
 
 A relay (a "TURN server") passes your encrypted connection along when networks block a direct one, which mobile data and most home, school and office networks do. It can't see what you share. Only the person who starts the session needs one.
 
-1. Create a free account with a TURN provider, for example ExpressTURN or Metered (both have free plans; check their current limits).
-2. In the provider's dashboard, copy the **server address** (for example `free.expressturn.com:3478`), the **username** and the **password**. A "secret key" isn't needed.
+1. Create a free account with a TURN relay provider, for example [Metered Open Relay](https://www.metered.ca/tools/openrelay/). Many providers have free plans; check their current limits.
+2. In the provider's dashboard, copy the **server address** (it looks like `relay.example.com:3478`), the **username** and the **password**. A "secret key" isn't needed.
 3. Paste them into **Relay for internet connections** in the Connect tab and tap **Test relay**. It should say "Relay works".
 4. Tick **Remember these relay details** so you don't have to type them again.
 
@@ -120,19 +120,22 @@ To report a security problem, see [SECURITY.md](SECURITY.md).
 
 | Plays everywhere | Converted by the app (sound inside video files) |
 |---|---|
-| AAC, MP3, Opus, Vorbis, FLAC | AC-3 (Dolby Digital), E-AC-3 (Dolby Digital Plus), DTS and DTS-HD, TrueHD, ALAC, WMA, PCM |
+| AAC, MP3, Opus, Vorbis, FLAC | AC-3 (Dolby Digital), E-AC-3 (Dolby Digital Plus), DTS and DTS-HD, TrueHD, ALAC, WMA (incl. Pro and Lossless), WavPack, TTA, Monkey's Audio, MP1/MP2, AMR, ADPCM, A-law/µ-law, RealAudio, PCM |
 
 Video files: MKV, MP4/M4V, MOV, AVI, WebM, MPEG-TS/M2TS, WMV and FLV. Plain music files play as the browser allows (MP3, AAC/M4A, FLAC, OGG/Opus and WAV work everywhere).
 
-- **Several sound tracks** (for example English, Romanian and a commentary): pick one in the **Audio** menu under the title.
+- **Several sound tracks** (for example English, Romanian and a commentary): every track in the file is listed in the **Audio** menu under the title, and any of them can be picked.
+- **Subtitles inside the file:** listed in the **Subtitles** menu next to it (or press **C** / the CC button to turn on the first one). They're read in the background, starting where you're watching, so they appear within a second or two. Picture subtitles (PGS from Blu-ray, VobSub from DVD) are listed but can't be shown yet; an `.srt` file works instead.
 - **Surround** is mixed down to stereo.
 - **At speeds other than 1×**, converted sound plays slightly higher or lower in pitch.
 - **When streaming**, the converted sound is sent along, so the other person hears it too.
 - **Turning it off:** Settings → "Convert sound the browser can't play".
 
-The converter is FFmpeg compiled to WebAssembly (see [tools/audio-decoder](tools/audio-decoder/README.md)).
+The converter is FFmpeg compiled to WebAssembly (see [tools/audio-decoder](tools/audio-decoder/README.md)); the same module repackages MKV videos for Firefox (below).
 
-**If a video isn't playing smoothly**, the app tells you. Firefox's support for MKV files is newer than Chrome's: if an MKV stutters in Firefox, Chrome or Edge usually play it more smoothly. HEVC and 10-bit videos are heavy for many devices. Converting to MP4 with H.264 always helps:
+**Smoother MKV videos in Firefox:** Firefox's support for MKV files is new, and it plays them less smoothly than MP4. So in Firefox the app repackages MKV videos (H.264 and HEVC) as MP4 while they play: the picture is copied as it is, not re-encoded, and nothing is uploaded. It's the **Smoother MKV videos** setting (on by default in Firefox; you can turn it on in other browsers too). If repackaging doesn't work for a file, the app says so and plays it the usual way.
+
+**If a video isn't playing smoothly**, the app tells you. HEVC and 10-bit videos are heavy for many devices. Converting to MP4 with H.264 always helps:
 
     ffmpeg -i movie.mkv -c:v libx264 -crf 20 -c:a aac movie.mp4
 
@@ -147,6 +150,8 @@ When streaming, only the person who has the file needs a browser that can play i
   3. Make a new invitation.
   4. If it still fails, tap **Copy details for the developer** and paste the result into a [bug report](../../issues/new/choose). It contains no addresses or passwords.
 - **No sound from reactions on a phone:** tap the page once; phones only allow sound after a tap.
+- **The other person hears no sound when you stream:** update both of you to version 1.5.1 or later (the online version is always up to date). Older versions sent sound only for the first file.
+- **Sound stops after jumping in a video (phones):** from version 1.5.1 the app notices and recovers by itself, usually within a few seconds. If it keeps happening with one file, converting it to MP4 always helps (see below).
 - **Notifications on Android:** they need the online version (or the installed app), or the page opened through an `http://localhost` address (Cx File Explorer does this). They don't work for a page opened as a file.
 - **The installed app shows an old version:** close it completely and open it again with internet.
 
@@ -160,7 +165,7 @@ When streaming, only the person who has the file needs a browser that can play i
     tools/make_icons.py       draws the icons
     .github/workflows/pages.yml  publishes the app online (GitHub Pages) on every change
     src/audio-decoder.worker.js  background worker that converts sound (packed into app/audio-decoder.js)
-    tools/audio-decoder/      the sound converter: C source, compiled WebAssembly, build script, test
+    tools/audio-decoder/      the sound converter and MP4 repackager: C source, compiled WebAssembly, build script, tests
     tests/                    smoke test, test media generator and a local test relay
 
 Always edit `src/index.template.html` and rebuild. The page's security policy contains hashes of its own code, so a hand-edited `app/index.html` won't run. See [CONTRIBUTING.md](CONTRIBUTING.md) and [tests/README.md](tests/README.md).
