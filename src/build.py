@@ -46,6 +46,15 @@ if site:   # link previews (Open Graph) when the address is shared in a chat app
     ]) + '\n<meta name="twitter:card" content="summary_large_image">'
 src = src.replace("<!--SOCIAL-->", social)
 
+# Fonts (Newsreader and Hanken Grotesk, SIL Open Font License; see licenses/) are embedded in the
+# page itself, so it needs nothing from other websites and works as a file too.
+FONTS = [("Newsreader", "normal", "400 500", "newsreader.woff2"), ("Newsreader", "italic", "400 500", "newsreader-italic.woff2"),
+         ("Hanken Grotesk", "normal", "400 700", "hanken.woff2")]
+faces = "".join(
+    "@font-face{font-family:'%s';font-style:%s;font-weight:%s;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}\n"
+    % (fam, sty, wt, base64.b64encode((here / "fonts" / f).read_bytes()).decode()) for fam, sty, wt, f in FONTS)
+src = src.replace("/*__FONTS__*/", faces)
+
 def h(block):
     return "'sha256-" + base64.b64encode(hashlib.sha256(block.encode("utf-8")).digest()).decode() + "'"
 
@@ -74,7 +83,7 @@ csp = "; ".join([
     "manifest-src 'self'",
     "worker-src 'self' blob:",
     "connect-src 'none'",
-    "font-src 'none'",
+    "font-src data:",
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'none'",

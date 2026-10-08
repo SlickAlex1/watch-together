@@ -35,6 +35,13 @@ The sound converter (`app/audio-decoder.js`, built from `tools/audio-decoder/`) 
 
 Some of the audio formats it decodes may be covered by patents in some countries.
 
+The app embeds two typefaces, each reduced to the characters it uses (`src/fonts/`, made by `tools/make_fonts.py`):
+
+- **Newsreader**, Copyright 2020 The Newsreader Project Authors (https://github.com/productiontype/Newsreader);
+- **Hanken Grotesk**, Copyright 2021 The Hanken Grotesk Project Authors (https://github.com/marcologous/hanken-grotesk).
+
+Both are licensed under the SIL Open Font License, version 1.1: see [licenses/OFL-Newsreader.txt](licenses/OFL-Newsreader.txt) and [licenses/OFL-HankenGrotesk.txt](licenses/OFL-HankenGrotesk.txt). The only changes are removing unused characters and fixing the weight and size settings; neither license names a Reserved Font Name.
+
 ## Built with Claude
 
 Watch together was built with the help of Claude, an AI model made by Anthropic. Anthropic is not affiliated with this project and is not responsible for it.

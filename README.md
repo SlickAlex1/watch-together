@@ -1,8 +1,8 @@
 # Watch together
 
 [![Status: beta](https://img.shields.io/badge/status-beta-orange)](CHANGELOG.md)
-[![Version 1.6.0](https://img.shields.io/badge/version-1.6.0-d6b47a)](CHANGELOG.md)
-[![Open the app](https://img.shields.io/badge/open%20the%20app-online-d6b47a)](https://slickalex1.github.io/watch-together/)
+[![Version 1.7.0](https://img.shields.io/badge/version-1.7.0-e9b872)](CHANGELOG.md)
+[![Open the app](https://img.shields.io/badge/open%20the%20app-online-e9b872)](https://slickalex1.github.io/watch-together/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Runs in: Chrome, Edge, Firefox](https://img.shields.io/badge/runs%20in-Chrome%20%7C%20Edge%20%7C%20Firefox-555)](#quick-start)
 [![Works on: desktop and Android](https://img.shields.io/badge/works%20on-desktop%20%7C%20Android-555)](#quick-start)
@@ -18,9 +18,9 @@ End-to-end encrypted. No server, no account, nothing you have to install.
 
 **▶ [Open Watch together](https://slickalex1.github.io/watch-together/)** in Chrome, Edge or Firefox, or [download it](../../releases/latest) to use it from a folder.
 
-*Made by SlickAlex · powered by Claude · version 1.6.0 (beta) · [GPL-3.0](LICENSE)*
+*Made by SlickAlex · powered by Claude · version 1.7.0 (beta) · [GPL-3.0](LICENSE)*
 
-![Watch together playing a video, with a chat message flying across it and the shared playlist](docs/screenshots/player.png)
+![Watch together at night: an episode playing with its colours glowing around the player, moments pinned on the timeline, reactions under the title and the playlist beside it](docs/screenshots/player.png)
 
 > **Beta:** Watch together works and is tested, but it hasn't been used on many devices yet. If something breaks, please [open an issue](../../issues/new/choose).
 
@@ -34,15 +34,22 @@ End-to-end encrypted. No server, no account, nothing you have to install.
 - **Movie sound browsers can't play.** AC-3, E-AC-3, DTS, TrueHD and more (common in MKV movies) are converted on your device and played in sync. Files with several sound tracks get a menu to pick the language.
 - **Music too.** MP3, M4A, FLAC, OGG and WAV, with cover art, title and artist read from the file.
 - **Playlists.** Episodes and songs play in order. There's loop, shuffle, like/dislike and "continue watching". You can also share your playlist so the other person can pick (and optionally edit).
+- **Moments.** Every message and reaction is pinned to the second it happened, as a dot on the timeline. Tap one and you both go back to it.
+- **A title card when you pause.** It says who paused and where, shows the moments so far and what's up next, and lets you say something right there.
 - **Chat.**
   - Encrypted messages, with replies.
   - **Bullet chat**: messages fly across the video.
-  - **Reactions with sound**: applause, boo, laughter and more.
+  - **Reactions with sound**: Ha!, Oh!, Aww, Bravo, Wah-wah, Boo and Ba-dum, in each person's own colour.
+- **Day and night.** A warm light look for the day and a dark one for watching, following your device or chosen in Settings. While something plays, its colours glow softly around the player (you can turn this off).
 - **Subtitles.** The ones inside MKV and MP4 files (SRT, ASS/SSA, WebVTT, MP4 text) appear in a **Subtitles** menu, and you can add `.srt` and `.vtt` files. Size and timing are adjustable.
 - **Invitations with a preview.** A picture and a friendly message that the other person pastes into the app.
 - **Works over the internet.** It connects directly when possible, or through a relay you choose. With a relay, IP addresses stay hidden.
 - **Online or from a folder.** Open it from its web address, install it like an app on your phone or computer (it then works without internet too), or download it and open it as a file.
 - **Notifications, picture-in-picture**, signal strength and data usage display, and keyboard shortcuts.
+
+| Paused: who paused, the moments so far, what's next (day look) | Connecting in three small steps |
+|---|---|
+| ![The paused title card by day, with the list of moments and the "Resume together" button](docs/screenshots/paused.png) | ![The connect page: "Who's on the other sofa?", with "Invite someone" and "I got an invite"](docs/screenshots/connect.png) |
 
 | Music with cover art | On a phone | Invitation picture |
 |---|---|---|
@@ -56,13 +63,15 @@ End-to-end encrypted. No server, no account, nothing you have to install.
 
    Both work the same way, and you can mix them: one person online, the other from a folder.
 2. **Add something to watch.** In the **Playlist** tab, add your videos or music.
-3. **Choose where the other person is** (Connect tab):
-   - **Somewhere else (over the internet).** First set up a relay (**Step 1**, below). Between two homes, phones or countries, a direct connection fails more often than it works, and the relay also hides your IP address. You do this once.
-   - **Next to me (same Wi-Fi).** No relay needed; go straight to Step 2.
-4. **Connect (Step 2).**
-   1. One person taps **Start a session** and sends the invitation (Share… or Copy) in any chat app.
-   2. The other taps **Join a session**, pastes the whole message, and sends the reply back.
+3. **Say where they are** (Connect tab, "Where are they?"):
+   - **Elsewhere (over the internet).** Set up a free relay first ([below](#set-up-a-free-relay-over-the-internet)). Between two homes, phones or countries, a direct connection fails more often than it works, and the relay also hides your IP address. You do this once.
+   - **Same Wi-Fi.** No relay needed.
+4. **Connect, in three small steps.**
+   1. One person taps **Invite someone** and sends the invitation (Share… or Copy) in any chat app.
+   2. The other taps **I got an invite**, pastes the whole message, taps **Create reply** and sends the reply back.
    3. The first person pastes the reply and taps **Connect**.
+
+   The steps light up as you go, so you can see who's waiting for whom.
 5. **Compare the safety code** on a call. If it matches, nobody is in the middle, and chat unlocks.
 
 Both people should use the same version of the app; it's shown at the bottom of the page. The online version is always the latest.
@@ -77,13 +86,13 @@ Opened online, Watch together can be installed like an app: it gets its own icon
 
 Updates arrive by themselves: the app checks for a newer version whenever it's opened with internet. To remove it, uninstall it like any other app.
 
-## Step 1: set up a free relay (over the internet)
+## Set up a free relay (over the internet)
 
 A relay (a "TURN server") passes your encrypted connection along when networks block a direct one, which mobile data and most home, school and office networks do. It can't see what you share. Only the person who starts the session needs one.
 
 1. Create a free account with a TURN relay provider, for example [Metered Open Relay](https://www.metered.ca/tools/openrelay/). Many providers have free plans; check their current limits.
 2. In the provider's dashboard, copy the **server address** (it looks like `relay.example.com:3478`), the **username** and the **password**. A "secret key" isn't needed.
-3. Paste them into **Relay for internet connections** in the Connect tab and tap **Test relay**. It should say "Relay works".
+3. Paste them into **Relay for internet connections** in the Connect tab (below the two big buttons) and tap **Test relay**. It should say "Relay works".
 4. Tick **Remember these relay details** so you don't have to type them again.
 
 With a relay:
@@ -143,7 +152,8 @@ When streaming, only the person who has the file needs a browser that can play i
 
 ## Troubleshooting
 
-- **Connection fails:** over the internet, set up a relay first (Step 1). Tap **Check my connection** on both devices to see why a direct connection doesn't work.
+- **Connection fails:** over the internet, set up a relay first ([how](#set-up-a-free-relay-over-the-internet)). Tap **Check my connection** on both devices to see why a direct connection doesn't work.
+- **Through a relay, the first try failed and the second worked:** fixed in 1.6.1. A relay can be slow to answer the first time, and older versions made the invite before it answered. The app now waits for it (you'll see "Waiting for the relay to answer…").
 - **"Couldn't agree on video and audio formats":**
   1. Update both browsers.
   2. Use the same app version on both devices.
@@ -163,6 +173,8 @@ When streaming, only the person who has the file needs a browser that can play i
     src/sw.js                 offline copy and notification helper (service worker)
     src/manifest.webmanifest  makes the online version installable; icons in src/icons/
     tools/make_icons.py       draws the icons
+    tools/make_fonts.py       makes the two embedded typefaces (src/fonts/) small
+    tools/make_demo_media.py  makes the invented demo episodes and song used for the screenshots
     .github/workflows/pages.yml  publishes the app online (GitHub Pages) on every change
     src/audio-decoder.worker.js  background worker that converts sound (packed into app/audio-decoder.js)
     tools/audio-decoder/      the sound converter and MP4 repackager: C source, compiled WebAssembly, build script, tests
@@ -178,8 +190,8 @@ Watch together is free software under the **GNU General Public License v3** (or 
 
 **You're responsible for what you play, stream and share with it.** Only share content you have the right to share, and follow the laws where you live. More in [NOTICE.md](NOTICE.md).
 
-The sound converter contains FFmpeg, licensed under the [LGPL 2.1 or later](licenses/LGPL-2.1.txt).
+The sound converter contains FFmpeg, licensed under the [LGPL 2.1 or later](licenses/LGPL-2.1.txt). The typefaces Newsreader and Hanken Grotesk are under the [SIL Open Font License 1.1](licenses/).
 
 ## Credits
 
-Made by **SlickAlex**. Built with the help of Claude, an AI model by Anthropic. Anthropic isn't affiliated with this project. Sound conversion uses [FFmpeg](https://ffmpeg.org).
+Made by **SlickAlex**. Built with the help of Claude, an AI model by Anthropic. Anthropic isn't affiliated with this project. Sound conversion uses [FFmpeg](https://ffmpeg.org). Type: [Newsreader](https://github.com/productiontype/Newsreader) and [Hanken Grotesk](https://github.com/marcologous/hanken-grotesk), by their project authors, both under the SIL Open Font License.

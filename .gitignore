@@ -1,5 +1,6 @@
 # Generated test media (create it with tests/make_test_media.sh)
 tests/media/
+tests/demo-media/
 # Python
 __pycache__/
 *.pyc

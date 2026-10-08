@@ -3,6 +3,7 @@
 Lets you test the app's relay features without an account at a relay provider:
 
     python3 test_relay.py 192.168.1.20            # your computer's local IP address
+    python3 test_relay.py 192.168.1.20 --slow-first 10   # first answers take 10 s (like a slow first login)
 
 Then in the app use relay address 192.168.1.20:3478, username "tester", password "secret".
 For temporary logins (TURN REST API) use the secret key "restsecret" instead of a password.
@@ -12,7 +13,9 @@ Copyright (C) 2026 SlickAlex. Licensed under the GNU GPL v3 or later (see LICENS
 """
 import asyncio, hashlib, hmac, os, socket, struct, sys, zlib
 
-IP = sys.argv[1] if len(sys.argv) > 1 else '127.0.0.1'   # address to listen on and relay from
+IP = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else '127.0.0.1'   # address to listen on and relay from
+SLOW_FIRST = float(sys.argv[sys.argv.index('--slow-first') + 1]) if '--slow-first' in sys.argv else 0
+FIRST_ALLOC = []   # when the first allocation was asked for (for --slow-first)
 PORT = 3478
 USER, PASS, REALM = 'tester', 'secret', 'test.local'
 REST_SECRET = b'restsecret'   # temporary logins: username "expiry:name", password base64(HMAC-SHA1(secret, username))
@@ -116,7 +119,11 @@ class Server(asyncio.DatagramProtocol):
         a = self.allocs.get(addr)
         if method == 0x003:  # allocate
             if not a: a = self.allocs[addr] = Alloc(self, addr); LOG.append(('alloc', addr, a.port))
-            self.transport.sendto(build(0x0103, tid, [(A_RELAYED, xaddr(IP, a.port)), (A_MAPPED_XOR, xaddr(*addr)), (A_LIFE, struct.pack('!I', 600))], True, key), addr)
+            reply = build(0x0103, tid, [(A_RELAYED, xaddr(IP, a.port)), (A_MAPPED_XOR, xaddr(*addr)), (A_LIFE, struct.pack('!I', 600))], True, key)
+            if not FIRST_ALLOC: FIRST_ALLOC.append(time.time())
+            wait = FIRST_ALLOC[0] + SLOW_FIRST - time.time()
+            if wait > 0: asyncio.get_event_loop().call_later(wait, self.transport.sendto, reply, addr)
+            else: self.transport.sendto(reply, addr)
         elif method == 0x004:  # refresh
             self.transport.sendto(build(0x0104, tid, [(A_LIFE, struct.pack('!I', 600))], True, key), addr)
         elif method == 0x008 and a:  # create permission

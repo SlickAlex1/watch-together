@@ -20,6 +20,12 @@ Two browser windows connect and check the main features:
 
 It prints PASS/FAIL for each check and exits with code 1 if anything fails. Set `CHROMIUM=/path/to/chrome` to test a particular browser.
 
+## Moments test
+
+`test_moments.py` checks the parts of the Ambient design that work between two people: the connect page making way for the player, reactions, moments on both timelines and in the chat, the paused title card (who paused, the moments, up next, jumping back together, saying something, resuming) and the day and night looks.
+
+    python3 test_moments.py [folder for a screenshot]
+
 ## Test media
 
 `make_test_media.sh` creates `tests/media/` (ignored by git), using only test patterns, tones and generated cover art, nothing copyrighted:

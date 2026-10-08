@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.7.0
+
+A new look, "Ambient", and a few new things that come with it. Every feature from before is still there.
+
+- **Day and night.** A warm, light look for the day and a dark one for watching. It follows your device's light or dark setting, or choose it in **Settings → Look**.
+- **Ambient light.** While a video or song plays, its colours glow softly around the player. It's worked out on your device from a tiny, blurred sample of the picture; turn it off in Settings → Look.
+- **A new way to connect: "Who's on the other sofa?"** Two big buttons, **Invite someone** and **I got an invite** (they replace "Start a session" and "Join a session"), then three small steps that light up as you go: send the invite, they send a reply, paste it. "Where are they?" (Elsewhere / Same Wi-Fi) and your name sit next to them, and the relay setup is one card below, folded away once it's ready. Invitations now say *Tap "I got an invite"*.
+- **Moments.** Messages and reactions are pinned to the second they happened: dots on the timeline (yours and theirs in different colours), and an "at 18:31" link under each chat message. Tap one and you both go back to just before it. Older versions simply ignore the times.
+- **The paused title card.** When the video is paused, the picture dims behind a title card that says who paused and where, how much is left, the moments so far, and what's up next. Resume together, go back 10 seconds, jump to a moment or say something, all from the card. On a phone it shows just the essentials.
+- **Reactions are words now:** Ha!, Oh!, Aww, Bravo, Wah-wah, Boo and Ba-dum, under the title next to your two "seats", and they float up in each person's own colour. The sounds and the 1–7 keys are the same.
+- **On a wide screen the controls sit on the picture** and fade while you watch; move the mouse or tap to bring them back (a tap on a faded video only wakes the controls). On phones they stay below the picture.
+- **Typefaces:** Newsreader for titles and Hanken Grotesk for everything else, embedded in the app (about 120 KB), so the page still makes no outside requests. Both are under the SIL Open Font License (see NOTICE).
+- The invitation picture and the social preview use the new look.
+- New test, `tests/test_moments.py`: moments, the title card, reactions and day/night. `tools/make_demo_media.py` makes the invented episodes used for the screenshots.
+
+## 1.6.1
+
+- **Fixed: through a relay, the first connection often failed** ("…a turns: one on port 443…") and the second worked. A relay can take several seconds to answer the first time (finding its address, a secure connection, a login round); the app made the invite after at most 8 seconds, sometimes before the relay had answered, so the invite went without it. It now waits for the relay (up to 20 seconds, showing "Waiting for the relay to answer…") and continues as soon as it answers. If it still doesn't answer, the error message now says so plainly.
+- **Fixed: black screen after taking turns.** When one of you streamed a song or video and then the other streamed a video, the first person's screen could stay black while sound and subtitles worked. In Chrome, the earlier capture of the player (used to stream your own file) stopped the incoming picture; the player now shows copies of the incoming tracks.
+- The test relay (`tests/test_relay.py`) has a `--slow-first` option to check this.
+
 ## 1.6.0
 
 - **Subtitles inside the video file.** MKV and MP4 subtitles (SRT, ASS/SSA, WebVTT, MP4 text) now appear in a **Subtitles** menu next to Audio, and the CC button (or C) turns on the first one. A track marked as default in the file is turned on by itself. They're read in the background from where you're watching, so they show up within a second or two. Picture subtitles (PGS, VobSub) are listed but can't be shown yet.

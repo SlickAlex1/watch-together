@@ -6,7 +6,7 @@
 //   It always tries the network first, so you get updates as soon as they're published.
 // - Shows notifications and brings the app back when one is tapped.
 // It never stores or sees your videos, music or chat, and only fetches the app's own files.
-const VERSION = '1.6.0';
+const VERSION = '1.7.0';
 const PREFIX = 'watch-together-';
 const CACHE = PREFIX + VERSION;
 const FILES = ['./', 'index.html', 'audio-decoder.js', 'manifest.webmanifest',
