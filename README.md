@@ -1,7 +1,7 @@
 # Watch together
 
 [![Status: beta](https://img.shields.io/badge/status-beta-orange)](CHANGELOG.md)
-[![Version 1.7.0](https://img.shields.io/badge/version-1.7.0-e9b872)](CHANGELOG.md)
+[![Version 1.7.1](https://img.shields.io/badge/version-1.7.1-e9b872)](CHANGELOG.md)
 [![Open the app](https://img.shields.io/badge/open%20the%20app-online-e9b872)](https://slickalex1.github.io/watch-together/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Runs in: Chrome, Edge, Firefox](https://img.shields.io/badge/runs%20in-Chrome%20%7C%20Edge%20%7C%20Firefox-555)](#quick-start)
@@ -18,7 +18,7 @@ End-to-end encrypted. No server, no account, nothing you have to install.
 
 **▶ [Open Watch together](https://slickalex1.github.io/watch-together/)** in Chrome, Edge or Firefox, or [download it](../../releases/latest) to use it from a folder.
 
-*Made by SlickAlex · powered by Claude · version 1.7.0 (beta) · [GPL-3.0](LICENSE)*
+*Made by SlickAlex · powered by Claude · version 1.7.1 (beta) · [GPL-3.0](LICENSE)*
 
 ![Watch together at night: an episode playing with its colours glowing around the player, moments pinned on the timeline, reactions under the title and the playlist beside it](docs/screenshots/player.png)
 
@@ -40,7 +40,7 @@ End-to-end encrypted. No server, no account, nothing you have to install.
   - Encrypted messages, with replies.
   - **Bullet chat**: messages fly across the video.
   - **Reactions with sound**: Ha!, Oh!, Aww, Bravo, Wah-wah, Boo and Ba-dum, in each person's own colour.
-- **Day and night.** A warm light look for the day and a dark one for watching, following your device or chosen in Settings. While something plays, its colours glow softly around the player (you can turn this off).
+- **Day and night.** A warm light look for the day and a dark one for watching, following your device or chosen in Settings. While something plays, its colours glow softly around the player, soft lights drift behind the page and the panels are slightly see-through (each can be turned off in Settings → Look).
 - **Subtitles.** The ones inside MKV and MP4 files (SRT, ASS/SSA, WebVTT, MP4 text) appear in a **Subtitles** menu, and you can add `.srt` and `.vtt` files. Size and timing are adjustable.
 - **Invitations with a preview.** A picture and a friendly message that the other person pastes into the app.
 - **Works over the internet.** It connects directly when possible, or through a relay you choose. With a relay, IP addresses stay hidden.
@@ -153,6 +153,7 @@ When streaming, only the person who has the file needs a browser that can play i
 ## Troubleshooting
 
 - **Connection fails:** over the internet, set up a relay first ([how](#set-up-a-free-relay-over-the-internet)). Tap **Check my connection** on both devices to see why a direct connection doesn't work.
+- **"Both sides reached the relay but still could not connect":** fixed in 1.7.1, when it happened because the reply was pasted more than a few seconds after it was made (the reply side gave up waiting). Both of you need 1.7.1 or later. If it still happens, add a `turns:…:443?transport=tcp` relay address.
 - **Through a relay, the first try failed and the second worked:** fixed in 1.6.1. A relay can be slow to answer the first time, and older versions made the invite before it answered. The app now waits for it (you'll see "Waiting for the relay to answer…").
 - **"Couldn't agree on video and audio formats":**
   1. Update both browsers.

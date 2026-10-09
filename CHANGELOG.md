@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.7.1
+
+- **Fixed: "Both sides reached the relay but still could not connect."** The person who replies to an invite starts trying to connect straight away, but the other side only answers once they've pasted the reply, often a minute or more later. After about 15 seconds the reply side's browser gave up and showed "Connection failed", and some browsers then never answered when the other side finally connected. Now the reply side keeps waiting ("Waiting for them to paste your reply") and offers its routes again each time its browser gives up, for up to 20 minutes. The test relay now lets permissions lapse after 5 minutes, as real relays do (`--perm-life` to change it).
+- **Fixed: the message box over the video** (speech-bubble button, or T) opened underneath the controls on a wide screen and in fullscreen. It now opens just above them, however tall they are, and the controls stay visible while it's open.
+- **Fixed: on a phone held sideways in fullscreen, the bottom of the picture was cut off** (the video was laid out taller than the screen). It now fits the screen.
+- **Fixed in Firefox for Android: a dark band at the top of the page** (and a darker strip on the right). The moving lights were a layer fixed to the screen, which Firefox draws wrongly around its sliding address bar. They're now attached in a way Firefox handles well (they still stay put while you scroll, so the panels glide over them), and nothing can make the page wider than the screen.
+- **Fixed in Firefox: thin light lines over the player**, even with nothing playing. The glow behind the player gently moved, and Firefox on phones can leave hairline gaps when it draws over a moving layer. The glow is now still (it still takes the picture's colours), and the drifting lights only slide.
+- **Fixed: picking the episode that's already playing restarted it**, and in Firefox could leave the screen black. It now just carries on (or plays, if it was paused). "Loop one" also starts again without reloading the file.
+- **The playlist follows what's playing:** the episode that's on shows "playing · 18:42 of 47:10" and a moving bar, updated every second.
+- **Fullscreen subtitles sit higher:** clear of the screen's edge, and above the controls while they show.
+- **"Elsewhere / Same Wi-Fi" slides** from one to the other, like the tabs.
+- **Softer lights:** the two glowing patches behind "Who's on the other sofa?" are gone, and the background lights fade out slowly from the sides, so they read as a haze rather than spots. When you pause, the warm light is a low, wide band across the top.
+- **No more blue box when you tap something** in Chrome on Android (the browser's own tap highlight is turned off; the buttons show their own response).
+- **Moving lights.** Soft lights now drift slowly behind the whole page, in the colours of what's playing. They have moods: they dim a little while you watch, come up warm like a cinema's house lights when you pause, and answer with a small, soft bloom of light where you tap a button or tab, or when one of you reacts. The side panel, tabs, pills and buttons are slightly see-through, so the lights show softly through them. Both can be turned off in **Settings → Look** ("Moving lights", "See-through panels"), and the movement stops by itself if your device asks for reduced motion.
+
 ## 1.7.0
 
 A new look, "Ambient", and a few new things that come with it. Every feature from before is still there.

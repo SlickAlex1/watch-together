@@ -33,6 +33,7 @@
 /*__FONTS__*/
 @property --g1 { syntax: '<color>'; inherits: true; initial-value: #4a3a5c; }
 @property --g2 { syntax: '<color>'; inherits: true; initial-value: #8a5a3e; }
+@property --g3 { syntax: '<color>'; inherits: true; initial-value: #2a3a5c; }
 /* Night is the default look; Day follows a light device setting, or the choice in Settings. */
 :root {
   --bg: #0b0a0f; --surface: #131118; --raise: #1d1a23; --card: rgba(255,255,255,.035); --chip: rgba(255,255,255,.06);
@@ -45,6 +46,8 @@
   --bubble-me: #e9b872; --bubble-me-ink: #241a0c; --bubble-them: #24212b;
   --ok: #9cd3a0; --warn: #f0c26e; --bad: #f09a92;
   --hero-g1: #4a3a5c; --hero-g2: #8a5a3e; --glow-o: .6; --shadow: 0 24px 60px rgba(0,0,0,.5);
+  --g1: #4a3a5c; --g2: #8a5a3e; --g3: #2a3a5c; --lights-o: .42; --glass: 74%; --house: #e9b872;
+  transition: --g1 1.8s ease, --g2 1.8s ease, --g3 1.8s ease;
   --serif: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: ui-monospace, 'SF Mono', Consolas, monospace;
@@ -62,6 +65,7 @@
   --bubble-me: #f3e6cf; --bubble-me-ink: #1c1a17; --bubble-them: #e2efe9;
   --ok: #2f7a3e; --warn: #8f5508; --bad: #b3362b;
   --hero-g1: #b9a2c2; --hero-g2: #f2b488; --glow-o: .55; --shadow: 0 24px 60px rgba(60,40,20,.25);
+  --g1: #b9a2c2; --g2: #f2b488; --g3: #9db6d6; --lights-o: .38; --glass: 70%; --house: #f2b488;
   color-scheme: light;
 }
 @media (prefers-color-scheme: light) {
@@ -76,13 +80,15 @@
     --bubble-me: #f3e6cf; --bubble-me-ink: #1c1a17; --bubble-them: #e2efe9;
     --ok: #2f7a3e; --warn: #8f5508; --bad: #b3362b;
     --hero-g1: #b9a2c2; --hero-g2: #f2b488; --glow-o: .55; --shadow: 0 24px 60px rgba(60,40,20,.25);
+    --g1: #b9a2c2; --g2: #f2b488; --g3: #9db6d6; --lights-o: .38; --glass: 70%; --house: #f2b488;
     color-scheme: light;
   }
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
+html { height: 100%; }
 html, body { margin: 0; min-height: 100%; }
-body { background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; transition: background-color .4s ease, color .4s ease; overflow-x: hidden; }
+body { background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; transition: background-color .4s ease, color .4s ease; position: relative; }
 button, input, select, textarea { font: inherit; color: inherit; }
 p { margin: .25rem 0 .75rem; }
 a { color: var(--link); }
@@ -129,7 +135,7 @@ a { color: var(--link); }
 .glow {
   position: absolute; left: -6%; right: -6%; top: -12%; bottom: -14%; pointer-events: none;
   background: radial-gradient(42% 52% at 22% 34%, var(--g1), transparent 70%), radial-gradient(38% 48% at 74% 62%, var(--g2), transparent 70%);
-  opacity: var(--glow-o); transition: --g1 1.6s ease, --g2 1.6s ease, opacity .8s ease;
+  opacity: var(--glow-o); transition: opacity .8s ease;
 }
 .glow.off { opacity: 0; }
 @media (max-width: 1020px) { .glow { left: -.75rem; right: -.75rem; } }
@@ -171,6 +177,7 @@ a { color: var(--link); }
   transition: bottom .3s ease;
 }
 .subtitle:empty { display: none; }
+.screen:has(.bullet-box:not([hidden])) .subtitle { bottom: calc(7% + 58px); }
 .screen:has(.pause-card:not([hidden])) :is(.subtitle, .bullets) { visibility: hidden; }
 
 .floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
@@ -265,18 +272,23 @@ input[type="range"].sfx-vol::-moz-range-thumb { background: var(--me); }
   .stage:not(.idle):not(.empty) .subtitle { bottom: calc(5% + 84px); }
   .pause-card { --pc-pb: 112px; }
   .art { padding-bottom: 104px; }
+  .bullet-box { bottom: calc(var(--ctl-h, 100px) + 10px); }
+  .screen:has(.bullet-box:not([hidden])) .subtitle { bottom: calc(5% + 150px) !important; }
 }
 .stage:has(.controls :focus-visible) .controls { opacity: 1; }
 
 /* fullscreen */
 .stage:fullscreen { border-radius: 0; box-shadow: none; }
-.stage:fullscreen .screen { flex: 1; }
+.stage:fullscreen .screen { flex: 1; min-height: 0; height: 100%; }
 .stage:fullscreen video { max-height: none; height: 100%; }
 .stage:fullscreen .controls { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,.85)); padding: 2.5rem 1.5rem 1rem; }
 .stage:fullscreen.idle .controls { opacity: 0; }
 .stage:fullscreen.idle { cursor: none; }
-.stage:fullscreen .subtitle { bottom: 12%; }
+.stage:fullscreen .subtitle { bottom: max(17%, calc(64px + env(safe-area-inset-bottom, 0px))) !important; }
+.stage:fullscreen:not(.idle) .subtitle { bottom: max(15%, calc(var(--ctl-h, 120px) + 18px)) !important; }
+.stage:fullscreen .screen:has(.bullet-box:not([hidden])) .subtitle { bottom: calc(var(--ctl-h, 120px) + 84px) !important; }
 .stage:fullscreen .pause-card { --pc-pb: 120px; }
+.stage:fullscreen .bullet-box { bottom: calc(var(--ctl-h, 120px) + 10px); }
 
 /* ---------- the paused title card ---------- */
 .pause-card {
@@ -376,6 +388,41 @@ input[type="range"].sfx-vol::-moz-range-thumb { background: var(--me); }
 .react:hover { border-color: var(--me); background: var(--me-soft); }
 .react:active { transform: scale(.92); }
 
+/* ---------- moving lights behind the page, and see-through panels (both can be turned off) ---------- */
+.ambience {
+  /* Stays put while the page scrolls over it. "sticky" rather than "fixed": Firefox for Android draws full-screen fixed layers wrongly around its sliding address bar. */
+  position: sticky; top: 0; display: block; width: 100%; height: 100vh; height: 100lvh; margin-bottom: -100vh; margin-bottom: -100lvh;
+  z-index: 0; pointer-events: none; overflow: hidden; contain: strict; opacity: var(--lights-o); transition: opacity 1.2s ease;
+}
+.top, .layout, .credit { position: relative; z-index: 1; max-width: 100%; overflow-x: clip; }
+.orb { position: absolute; width: 92vmax; height: 92vmax; border-radius: 50%; animation: drift-a 48s ease-in-out infinite alternate;
+  /* a slow falloff, so each light reads as haze rather than a disc */
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 80%, transparent) 0%, color-mix(in srgb, var(--c) 34%, transparent) 45%, color-mix(in srgb, var(--c) 10%, transparent) 75%, transparent 100%); }
+.orb.o1 { --c: var(--g1); left: -52vmax; top: -6vh; }
+.orb.o2 { --c: var(--g2); right: -54vmax; top: 30vh; animation-name: drift-b; animation-duration: 61s; }
+.orb.o3 { --c: var(--g3); left: 10vw; bottom: -66vmax; animation-name: drift-c; animation-duration: 74s; }
+@keyframes drift-a { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(16vw, 12vh, 0); } 100% { transform: translate3d(6vw, 26vh, 0); } }
+@keyframes drift-b { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-14vw, 18vh, 0); } 100% { transform: translate3d(-24vw, 4vh, 0); } }
+@keyframes drift-c { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(12vw, -14vh, 0); } 100% { transform: translate3d(-10vw, -6vh, 0); } }
+:root[data-lights="off"] .ambience { display: none; }
+/* Moods: the lights dim a little while you watch, come up warm like a cinema's house lights when you
+   pause, and a soft bloom answers when you pick something or someone reacts. */
+.orb.o4 { --c: var(--house); left: 50%; top: -30vmax; width: 130vmax; height: 52vmax; margin-left: -65vmax; opacity: 0; transition: opacity 1.8s ease; animation: none; }
+:root[data-mood="paused"] .orb.o4 { opacity: .85; }
+:root[data-mood="paused"] .ambience { opacity: calc(var(--lights-o) * 1.35); }
+:root[data-mood="playing"] .ambience { opacity: calc(var(--lights-o) * .8); }
+:root[data-mood="paused"] .glow { opacity: calc(var(--glow-o) * 1.2); }
+.bloom { position: absolute; left: var(--bx, 50%); top: var(--by, 50%); width: min(24vmax, 300px); height: min(24vmax, 300px); transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(closest-side, var(--bloom, var(--me)), transparent); opacity: 0; pointer-events: none; }
+.bloom.on { animation: bloom 1.5s ease-out; }
+@keyframes bloom { 0% { opacity: 0; } 25% { opacity: .65; } 100% { opacity: 0; } }
+:root:not([data-glass="off"]) .side { background: color-mix(in srgb, var(--surface) var(--glass), transparent); }
+:root:not([data-glass="off"]) .pill, :root:not([data-glass="off"]) .partner, :root:not([data-glass="off"]) .react,
+:root:not([data-glass="off"]) .door, :root:not([data-glass="off"]) .step:not(.now), :root:not([data-glass="off"]) details.relay,
+:root:not([data-glass="off"]) .you-card, :root:not([data-glass="off"]) .tabs { background: color-mix(in srgb, var(--surface) 55%, transparent); }
+:root:not([data-glass="off"]) .door.lead { background: color-mix(in srgb, var(--me-soft) 70%, transparent); }
+:root[data-theme="day"]:not([data-glass="off"]) .tabs { background: color-mix(in srgb, var(--raise) 70%, transparent); }
+@media (prefers-reduced-motion: reduce) { .orb { animation: none !important; } .bloom { display: none; } }
+
 /* ---------- side panel ---------- */
 .side { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: .9rem; container: side / inline-size; transition: background-color .4s ease; }
 .tabs { position: relative; display: flex; gap: .2rem; padding: 4px; border-radius: 999px; background: var(--raise); overflow-x: auto; scrollbar-width: none; }
@@ -470,10 +517,15 @@ dl.keys dd { margin: 0; color: var(--muted); }
 .you-card label.field { margin-top: .75rem; }
 fieldset.where { border: 0; padding: 0; margin: 0; min-width: 0; }
 fieldset.where legend { padding: 0; margin: 0 0 .45rem; font-size: .85rem; color: var(--muted); }
-.seg { display: flex; padding: 4px; border-radius: 999px; background: var(--raise); }
-.seg label { flex: 1; position: relative; cursor: pointer; }
+.seg { position: relative; display: flex; padding: 4px; border-radius: 999px; background: var(--raise); }
+.seg label { flex: 1; position: relative; z-index: 1; cursor: pointer; }
+@supports selector(:has(*)) {
+  .seg::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--solid); transition: transform .32s cubic-bezier(.2,.8,.2,1); }
+  .seg:has(label:nth-child(2) input:checked)::before { transform: translateX(100%); }
+  .seg input:checked + span { background: transparent !important; }
+}
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
-.seg span { display: block; text-align: center; padding: .5rem .6rem; border-radius: 999px; font-size: .88rem; font-weight: 600; color: var(--muted); transition: background-color .2s ease, color .2s ease; white-space: nowrap; }
+.seg span { display: block; text-align: center; padding: .5rem .6rem; border-radius: 999px; font-size: .88rem; font-weight: 600; color: var(--muted); transition: background-color .2s ease, color .25s ease; white-space: nowrap; }
 .seg input:checked + span { background: var(--solid); color: var(--solid-ink); }
 .seg input:focus-visible + span { outline: 2px solid var(--me); outline-offset: 2px; }
 .where-note { margin: .9rem 0 0; }
@@ -542,14 +594,9 @@ details.relay.attention { border-color: var(--me); box-shadow: 0 0 0 3px var(--m
 /* The connect page takes the whole window until you're connected or something is playing. */
 body.connect-view .layout { display: block; max-width: 1120px; margin: 0 auto; }
 body.connect-view .player { display: none; }
-body.connect-view .side { background: transparent; border: 0; padding: 0; }
+body.connect-view .side { background: transparent !important; border: 0; padding: 0; }
 body.connect-view .tabs { max-width: 520px; }
 body.connect-view .panel { padding: 2.4rem 0 0; }
-body.connect-view .hero::before {
-  content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: -110%; height: 300%; pointer-events: none;
-  background: radial-gradient(32% 45% at 32% 50%, var(--hero-g1) 0%, transparent 70%), radial-gradient(28% 40% at 66% 55%, var(--hero-g2) 0%, transparent 70%);
-  opacity: var(--glow-o);
-}
 body.connect-view #safetySection { border-top: 0; margin-top: 1.4rem; padding-top: 0; }
 body.connect-view #safetySection.waiting { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; color: var(--muted); }
 body.connect-view #safetySection.waiting .safety-line { display: block; margin: 0; }
@@ -572,11 +619,12 @@ body.connect-view #safetySection.waiting .safety { font-size: 1.1rem; font-famil
 .pl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem; font-weight: 600; }
 .pl-item.current .pl-name { font-weight: 700; }
 .pl-meta { grid-column: 2; color: var(--muted); font-size: .8rem; }
+.pl-now { grid-column: 2; order: 1; font-size: .78rem; font-weight: 600; color: var(--me); font-variant-numeric: tabular-nums; }
 .pl-badge { margin-left: .6rem; }
 .pl-badge[data-kind="ok"] { color: var(--ok); }
 .pl-badge[data-kind="warn"] { color: var(--warn); }
 .pl-badge[data-kind="bad"] { color: var(--bad); }
-.pl-prog { grid-column: 2; display: block; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; margin-top: .35rem; }
+.pl-prog { grid-column: 2; order: 2; display: block; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; margin-top: .35rem; }
 .pl-prog > span { display: block; height: 100%; width: var(--p, 0%); background: var(--me); }
 .pl-item.watched .pl-name { color: var(--muted); }
 .pl-item.watched .pl-prog > span { background: var(--ok); }
@@ -695,6 +743,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
 </style>
 </head>
 <body>
+<div id="ambience" class="ambience" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="orb o4"></span><span id="bloom" class="bloom"></span></div>
 <header class="top">
   <div class="brand">
     <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5l11 6.5-11 6.5z"/></svg>
@@ -1114,6 +1163,9 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
           <option value="night">Night: dark, for watching</option>
         </select>
         <label class="check"><input id="ambientOn" type="checkbox" checked><span>Ambient light: the colours of the picture glow softly around the player</span></label>
+        <label class="check"><input id="lightsOn" type="checkbox" checked><span>Moving lights: soft lights drift slowly behind the page, in the colours of what's playing</span></label>
+        <label class="check"><input id="glassOn" type="checkbox" checked><span>See-through panels: the lights show softly through the side panel and buttons</span></label>
+        <p class="hint">Turn these off for a plain, still page; on older phones that can also save a little battery.</p>
       </div>
       <div class="section">
         <h2>Playback</h2>
@@ -1238,7 +1290,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   const MAX_ITEMS = 100;
   const MAX_CHAT = 500;
   const MAX_NAME = 24;
-  const APP_VERSION = '1.7.0';
+  const APP_VERSION = '1.7.1';
   const IS_FIREFOX = /Firefox\//.test(navigator.userAgent);
   let userVol = 1, userMuted = false, wiping = false;   // volume is kept apart from the video element
   const STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
@@ -1889,8 +1941,40 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     else if (!l.relay && relayWasSet) msg = "Your relay didn't answer in time while this invite was being made, so the invite went without it. Check the relay with \"Test relay\", then start a new session.";
     else if (!r.relay && relayWasSet && role === 'host' && $('shareRelay').checked) msg = "The relay didn't answer in time on the other person's device while their reply was being made. Start a new session; it usually answers faster the second time.";
     else if (!l.relay || !r.relay) msg = "Only one side reached the relay. Usually that's still enough, but here it wasn't. Make sure the relay is included in the invite, and add a turns:…:443?transport=tcp address for networks that block UDP. Then start a new session.";
-    else msg = 'Both sides reached the relay but still could not connect. Try a different relay address (a turns: one on port 443 works on the strictest networks), then start a new session.';
+    else msg = "You both reached the relay, but the connection didn't go through. Start again with a new invite and reply, and paste the reply soon after it arrives. If it fails again, add a turns:…:443?transport=tcp relay address, which works on the strictest networks.";
     $('connErr').textContent = msg;
+  }
+  // The person who replies starts trying to connect at once, but the other side only answers once
+  // they've pasted the reply, often a minute or more later. Browsers give up after about 15 seconds
+  // (and some never try again), so while waiting the reply side offers the same routes again each
+  // time its browser gives up, which keeps the relay's door open, instead of reporting a failure.
+  let guestWait = null;           // { at, n, timer } while a reply is out and not yet answered
+  const GUEST_WAIT_MAX = 20 * 60 * 1000;
+  const guestWaitText = () => 'Waiting for them to paste your reply';
+  function rearmGuest(mine) {
+    if (!guestWait || pc !== mine) return;
+    if (Date.now() - guestWait.at > GUEST_WAIT_MAX) {
+      guestWait = null;
+      setStatus('Connection failed', 'bad');
+      $('guestErr').textContent = "Still not connected after 20 minutes. If they've pasted your reply, start again: they make a new invite, and you make a new reply.";
+      return;
+    }
+    setStatus(guestWaitText(), 'wait');
+    clearTimeout(guestWait.timer);
+    guestWait.timer = setTimeout(async () => {
+      if (!guestWait || pc !== mine || connected) return;
+      const n = ++guestWait.n;
+      let mid = null, idx = -1;
+      for (const line of String((pc.remoteDescription && pc.remoteDescription.sdp) || '').split(/\r?\n/)) {
+        if (line.startsWith('m=')) { idx++; mid = null; continue; }
+        if (line.startsWith('a=mid:')) { mid = line.slice(6).trim(); continue; }
+        const m = /^a=candidate:(\S+) (.*)$/.exec(line);
+        if (!m) continue;
+        // A new foundation makes the browser treat it as a fresh route and check it again.
+        const cand = `candidate:${m[1].slice(0, 24)}w${n} ${m[2]}`;
+        try { await pc.addIceCandidate({ candidate: cand, sdpMid: mid, sdpMLineIndex: Math.max(0, idx) }); } catch (_) {}
+      }
+    }, 2000);
   }
   async function createPC() {
     const config = await rtcConfig();
@@ -1900,9 +1984,10 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     const onState = () => {
       if (pc !== mine) return;
       const s = pc.connectionState || pc.iceConnectionState;
-      if (s === 'connecting' || s === 'checking') { if (!connected) setStatus('Connecting…', 'wait'); }
+      if (s === 'connecting' || s === 'checking') { if (!connected) setStatus(guestWait ? guestWaitText() : 'Connecting…', 'wait'); }
       else if (s === 'failed') {
         if (connected) { lostConnection(); return; }
+        if (role === 'guest' && guestWait) { rearmGuest(mine); return; }
         setStatus('Connection failed', 'bad'); explainFailure();
       } else if (s === 'disconnected' && connected) {
         setStatus('Connection unstable, trying to recover…', 'wait');
@@ -1958,6 +2043,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
 
   async function onOpen() {
     connected = true;
+    if (guestWait) { clearTimeout(guestWait.timer); guestWait = null; }
     notify('conn', 'Connected', "You're connected. Come back to start watching together.");
     clearTimeout(lostTimer);
     setTimeout(showRoute, 300);
@@ -2006,6 +2092,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   }
 
   function resetSession(status) {
+    if (guestWait) { clearTimeout(guestWait.timer); guestWait = null; }
     clearInterval(pingTimer); clearInterval(hbTimer); clearInterval(presenceTimer); clearInterval(statsTimer);
     streamOut = null; routeViaRelay = false; peer.quality = 'medium';
     lastBytes = { sent: 0, recv: 0 }; $('dataNow').hidden = true; $('dataInfo').textContent = '';
@@ -2215,6 +2302,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
       updateSteps();
       showPrediction();
       setStatus('Send the reply code back', 'wait');
+      guestWait = { at: Date.now(), n: 0, timer: null };
     } catch (e) {
       $('replyBtn').disabled = false;
       $('guestErr').textContent = e.message || 'Could not use that invite code.';
@@ -2986,6 +3074,32 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     try { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); } catch (_) {}
   }
   const getProgress = (it) => ($('rememberPos').checked && it && progress[it.hash]) || null;
+  // Picking the episode that's already on just carries on (and plays it if it was paused);
+  // reloading it restarted it from the top, and could leave the picture black in Firefox.
+  function playItem(i) {
+    if (i === cur && !streamIn && !loading && curItem()) {
+      if (v.paused && !v.ended) togglePlay();
+      else if (v.ended) { v.currentTime = 0; v.play().catch(() => { $('resume').hidden = false; }); }
+      return;
+    }
+    loadItem(i, { play: true, broadcast: true, resume: true });
+  }
+  // While something plays, its line in the playlist follows along: "playing · 18:42 of 47:10" and a
+  // moving bar, updated in place (rebuilding the list would get in the way of tapping it).
+  let liveTick = 0;
+  function updatePlaylistLive() {
+    if (cur < 0 || streamIn || loading) return;
+    const li = $('playlist').children[cur], it = curItem(), d = v.duration, t = v.currentTime;
+    if (!li || !it || !Number.isFinite(d) || d <= 0) return;
+    const main = li.querySelector('.pl-main');
+    let now = li.querySelector('.pl-now'), bar = li.querySelector('.pl-prog > span');
+    if (!now) { now = document.createElement('span'); now.className = 'pl-now'; main.appendChild(now); }
+    if (!bar) { const b = document.createElement('span'); b.className = 'pl-prog'; bar = document.createElement('span'); b.appendChild(bar); main.appendChild(b); }
+    now.textContent = `${v.paused ? 'paused' : 'playing'} · ${fmt(t)} of ${fmt(d)}`;
+    bar.style.setProperty('--p', clamp((t / d) * 100, 0, 100) + '%');
+    if (!v.paused && ++liveTick % 15 === 0) saveProgress();
+  }
+  setInterval(updatePlaylistLive, 1000);
   function saveProgress() {
     if (!$('rememberPos').checked || loading || streamIn) return;
     const it = curItem(), d = v.duration, t = v.currentTime;
@@ -3015,7 +3129,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   });
 
   // Settings remembered between visits (this browser only).
-  const PREF_CHECKS = ['ambientOn', 'convertAudio', 'repackOn', 'autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
+  const PREF_CHECKS = ['ambientOn', 'lightsOn', 'glassOn', 'convertAudio', 'repackOn', 'autoNext', 'fsChat', 'showReacts', 'rememberPos', 'skipDisliked', 'sfxOn', 'notifyOn', 'notifyHide', 'bulletOn', 'forceRelay', 'shareRelay', 'sharePl', 'editPl'];
   const PREF_SELECTS = { shareHours: ['3', '6', '12', '24'], subSize: ['0.8', '1', '1.25', '1.55'], streamQuality: ['high', 'medium', 'low'], playMode: ['auto', 'stream', 'local'], themeSel: ['auto', 'day', 'night'] };
   function savePrefs() {
     if (wiping) return;
@@ -4526,7 +4640,8 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     if (streamIn) return;
     saveProgress();
     if (!isLeader()) return;
-    if (loopMode === 'one') { loadItem(cur, { play: true, broadcast: true }); return; }
+    // Loop one: start again from the top without reloading the file (reloading could leave the picture black in Firefox).
+    if (loopMode === 'one') { v.currentTime = 0; v.play().catch(() => { $('resume').hidden = false; }); return; }
     if (!$('autoNext').checked) return;
     const i = nextIndex(false);
     if (i >= 0) { history.push(cur); loadItem(i, { play: true, broadcast: true, resume: true }); }
@@ -4673,7 +4788,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   const stage = $('stage');
   let idleTimer = null;
   const isPlaying = () => (streamIn ? streamState.p : cur >= 0 && !v.paused);
-  function goIdle() { if (isPlaying() && !stage.querySelector('.controls :focus-visible')) stage.classList.add('idle'); }
+  function goIdle() { if (isPlaying() && $('bulletBox').hidden && !stage.querySelector('.controls :focus-visible')) stage.classList.add('idle'); }
   function wake() {
     stage.classList.remove('idle');
     clearTimeout(idleTimer);
@@ -4931,6 +5046,8 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     if (!$('showReacts').checked) return;
     const el = document.createElement('span');
     el.className = 'float' + (who === 'them' ? ' them' : '');
+    const sr = $('stage').getBoundingClientRect();
+    bloomAt(sr.left + sr.width / 2, sr.bottom, who === 'them' ? 'var(--them)' : 'var(--me)');
     el.textContent = REACTIONS[i].w;
     el.style.setProperty('--x', (12 + Math.random() * 76) + '%');
     $('floats').appendChild(el);
@@ -5071,8 +5188,14 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     setTimeout(() => el.remove(), dur * 1000 + 500);
     layer.appendChild(el);
   }
+  // The box sits just above the controls, however tall they are (on a phone in fullscreen they take two rows).
+  function measureControls() { stage.style.setProperty('--ctl-h', $('controls').offsetHeight + 'px'); }
+  window.addEventListener('resize', measureControls);
+  document.addEventListener('fullscreenchange', () => requestAnimationFrame(measureControls));
   function openBulletBox() {
     $('bulletBox').hidden = !$('bulletBox').hidden;
+    measureControls();
+    wake();
     if (!$('bulletBox').hidden) $('bulletInput').focus();
   }
   function sendBullet() {
@@ -5229,7 +5352,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
       const meta = document.createElement('span'); meta.className = 'pc-tile-meta';
       meta.textContent = (it.kind === 'audio' ? 'Song · ' : '') + fmt(it.dur) + (connected ? (peerHas(it) ? ' · you both have it' : ` · streams to ${partnerName()}`) : '');
       b.append(th, name, meta);
-      b.addEventListener('click', () => loadItem(k, { play: true, broadcast: true, resume: true }));
+      b.addEventListener('click', () => playItem(k));
       box.appendChild(b);
     }
     // Moments: tap one to go back to it together; say something and it's pinned to this second.
@@ -5263,13 +5386,69 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   $('pcInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); sendPin(); } });
   $('pcResume').addEventListener('click', togglePlay);
   $('pcBack').addEventListener('click', () => skip(-10));
-  setInterval(renderPauseCard, 300);
+  setInterval(() => { renderPauseCard(); updateMood(); }, 300);
+  function updateMood() {
+    const mood = cur < 0 && !streamIn ? 'idle' : (streamIn ? streamState.p : !v.paused) ? 'playing' : 'paused';
+    if (document.documentElement.dataset.mood !== mood) document.documentElement.dataset.mood = mood;
+  }
+  const calm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  function bloomAt(x, y, color) {
+    if (!$('lightsOn').checked || (calm && calm.matches) || document.hidden) return;
+    const el = $('bloom'), r = $('ambience').getBoundingClientRect();
+    el.style.setProperty('--bx', Math.round(x - r.left) + 'px');
+    el.style.setProperty('--by', Math.round(y - r.top) + 'px');
+    el.style.setProperty('--bloom', color || 'var(--me)');
+    el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest && e.target.closest('button, [role=tab], .seg label, .filebtn');
+    if (!t || t.closest('#stage') || t.classList.contains('react')) return;
+    let x = e.clientX, y = e.clientY;
+    if (!e.detail) { const b = t.getBoundingClientRect(); x = b.left + b.width / 2; y = b.top + b.height / 2; }
+    bloomAt(x, y);
+  });
 
   // ---------- ambient light: the picture's colours glow around the player ----------
-  const glowCv = document.createElement('canvas');
-  glowCv.width = 12; glowCv.height = 6;
-  const glowCx = glowCv.getContext('2d', { willReadFrequently: true });
-  let glowKey = '';
+  // The picture is read through WebGL: drawing a playing video into a 2D canvas makes Chrome keep a
+  // copy of every frame it reads (about a frame's worth of memory each time, never freed), which
+  // crashed the page during long films. Through a WebGL texture it doesn't.
+  let glowGl = null, glowKey = '', glowFails = 0;
+  const glowPx = new Uint8Array(12 * 6 * 4);
+  function glowSampler() {
+    if (glowGl && !glowGl.gl.isContextLost()) return glowGl;
+    glowGl = null;
+    if (glowFails > 3) return null;
+    try {
+      const c = document.createElement('canvas'); c.width = 12; c.height = 6;
+      const gl = c.getContext('webgl', { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false, powerPreference: 'low-power' });
+      if (!gl) { glowFails = 9; return null; }
+      const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); return x; };
+      const prog = gl.createProgram();
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p; varying vec2 uv; void main() { uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }'));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float; varying vec2 uv; uniform sampler2D t; void main() { gl_FragColor = texture2D(t, uv); }'));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { glowFails = 9; return null; }
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+      for (const [k, val] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, val);
+      gl.viewport(0, 0, 12, 6);
+      glowGl = { gl };
+      return glowGl;
+    } catch (_) { glowFails++; return null; }
+  }
+  function readPicture(src) {
+    const s = glowSampler();
+    if (!s) return null;
+    const gl = s.gl;
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.readPixels(0, 0, 12, 6, gl.RGBA, gl.UNSIGNED_BYTE, glowPx);
+    return glowPx;
+  }
   function vivid(r, g, b) {
     const m = (r + g + b) / 3;
     let c = [r, g, b].map((x) => clamp(m + (x - m) * 1.5, 0, 255));
@@ -5277,31 +5456,39 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     if (top < 90) c = c.map((x) => x * Math.min(2.5, 90 / top));   // dark scenes still give a little light
     return 'rgb(' + c.map((x) => Math.round(x / 8) * 8).join(' ') + ')';
   }
+  const rootStyle = document.documentElement.style;
+  function applyLights() {
+    document.documentElement.dataset.lights = $('lightsOn').checked ? 'on' : 'off';
+    document.documentElement.dataset.glass = $('glassOn').checked ? 'on' : 'off';
+  }
+  for (const id of ['lightsOn', 'glassOn']) $(id).addEventListener('change', () => { applyLights(); sampleGlow(); });
   function sampleGlow() {
-    const el = $('glow'), on = $('ambientOn').checked;
-    el.classList.toggle('off', !on);
-    if (!on || document.hidden || document.body.classList.contains('connect-view')) return;
+    const on = $('ambientOn').checked, lights = $('lightsOn').checked;
+    $('glow').classList.toggle('off', !on);
+    if (!(on || lights) || document.hidden || document.body.classList.contains('connect-view')) return;
     const img = $('artImg');
     let src = null;
     if (!$('art').hidden && !img.hidden && img.complete && img.naturalWidth) src = img;
     else if ((cur >= 0 || streamIn) && v.readyState >= 2 && v.videoWidth) src = v;
     if (!src) {
-      if (glowKey) { glowKey = ''; el.style.removeProperty('--g1'); el.style.removeProperty('--g2'); }
+      if (glowKey) { glowKey = ''; for (const k of ['--g1', '--g2', '--g3']) rootStyle.removeProperty(k); }
       return;
     }
     try {
-      glowCx.drawImage(src, 0, 0, 12, 6);
-      const px = glowCx.getImageData(0, 0, 12, 6).data;
+      if (src === img && glowKey && glowKey.startsWith(img.src)) return;   // a cover doesn't change
+      const px = readPicture(src);
+      if (!px) return;
       const avg = (x0, x1) => {
         let r = 0, g = 0, b = 0, n = 0;
         for (let y = 0; y < 6; y++) for (let x = x0; x < x1; x++) { const i = (y * 12 + x) * 4; r += px[i]; g += px[i + 1]; b += px[i + 2]; n++; }
         return vivid(r / n, g / n, b / n);
       };
-      const c1 = avg(0, 6), c2 = avg(6, 12);
-      if (c1 + c2 !== glowKey) { glowKey = c1 + c2; el.style.setProperty('--g1', c1); el.style.setProperty('--g2', c2); }
+      const c1 = avg(0, 6), c2 = avg(6, 12), c3 = avg(3, 9);
+      const key = (src === img ? img.src : '') + c1 + c2 + c3;
+      if (key !== glowKey) { glowKey = key; rootStyle.setProperty('--g1', c1); rootStyle.setProperty('--g2', c2); rootStyle.setProperty('--g3', c3); }
     } catch (_) { /* a picture the browser won't let us read: keep the last colours */ }
   }
-  setInterval(sampleGlow, 1200);
+  setInterval(sampleGlow, 1500);
   $('ambientOn').addEventListener('change', sampleGlow);
 
   // ---------- presence ----------
@@ -5503,7 +5690,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
         fill.style.setProperty('--p', (pr.w ? 100 : clamp((pr.t / (it.dur || 1)) * 100, 2, 100)) + '%');
         bar.appendChild(fill); main.appendChild(bar);
       }
-      main.addEventListener('click', () => loadItem(i, { play: true, broadcast: true, resume: true }));
+      main.addEventListener('click', () => playItem(i));
       const tools = document.createElement('div'); tools.className = 'pl-tools';
       tools.append(
         toolBtn('Move up', 'm6 15 6-6 6 6', () => move(i, -1), i === 0),
@@ -5589,7 +5776,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
     const idx = items.findIndex((it) => it.hash === h);
     if (idx < 0) return;
     const nm = itemName(items[idx]);
-    if (op === 'play') { loadItem(idx, { play: true, broadcast: true, resume: true }); toast(null, `${partnerName()} picked ${nm}`); return; }
+    if (op === 'play') { playItem(idx); toast(null, `${partnerName()} picked ${nm}`); return; }
     if (!$('editPl').checked) return;
     if (op === 'up') move(idx, -1);
     else if (op === 'down') move(idx, 1);
@@ -5669,6 +5856,7 @@ dialog.terms.closing::backdrop { animation: fade-out .18s ease-in forwards; }
   $('editPl').disabled = !$('sharePl').checked;
   updateWhere();
   applyTheme();
+  applyLights();
   applyVolume(); updateControls();
   updateView();
   requestAnimationFrame(moveInk);

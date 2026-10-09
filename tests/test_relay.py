@@ -4,6 +4,7 @@ Lets you test the app's relay features without an account at a relay provider:
 
     python3 test_relay.py 192.168.1.20            # your computer's local IP address
     python3 test_relay.py 192.168.1.20 --slow-first 10   # first answers take 10 s (like a slow first login)
+    python3 test_relay.py 192.168.1.20 --perm-life 60    # permissions lapse after 60 s instead of 5 minutes
 
 Then in the app use relay address 192.168.1.20:3478, username "tester", password "secret".
 For temporary logins (TURN REST API) use the secret key "restsecret" instead of a password.
@@ -15,6 +16,7 @@ import asyncio, hashlib, hmac, os, socket, struct, sys, zlib
 
 IP = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else '127.0.0.1'   # address to listen on and relay from
 SLOW_FIRST = float(sys.argv[sys.argv.index('--slow-first') + 1]) if '--slow-first' in sys.argv else 0
+PERM_LIFE = float(sys.argv[sys.argv.index('--perm-life') + 1]) if '--perm-life' in sys.argv else 300   # RFC 5766: 5 minutes
 FIRST_ALLOC = []   # when the first allocation was asked for (for --slow-first)
 PORT = 3478
 USER, PASS, REALM = 'tester', 'secret', 'test.local'
@@ -72,9 +74,14 @@ def check_mi(msg, attrs, key):
             return hmac.compare_digest(hmac.new(key, bytes(hdr), hashlib.sha1).digest(), val)
     return None
 
+class Perms(dict):
+    """Permissions per peer IP address; each one lapses PERM_LIFE seconds after it was last made or refreshed."""
+    def add(self, ip): self[ip] = time.time() + PERM_LIFE
+    def __contains__(self, ip): return dict.get(self, ip, 0) > time.time()
+
 class Alloc:
     def __init__(self, server, client):
-        self.server, self.client, self.perms, self.ch2peer, self.peer2ch = server, client, set(), {}, {}
+        self.server, self.client, self.perms, self.ch2peer, self.peer2ch = server, client, Perms(), {}, {}
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); self.sock.bind((IP, 0)); self.sock.setblocking(False)
         self.port = self.sock.getsockname()[1]
         asyncio.get_event_loop().add_reader(self.sock.fileno(), self.on_peer)
